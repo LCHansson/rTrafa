@@ -13,10 +13,17 @@
 #' compatible with that measure. Invalid dimensions are excluded by default
 #' (controlled by `only_valid`).
 #'
+#' `measure` can also be a **vector of several measure names**. In that
+#' case, the API returns the intersection: only dimensions that are valid
+#' for *all* the requested measures. This is useful when planning a query
+#' that mixes several measures and you want to know which dimensions you
+#' can safely filter on.
+#'
 #' @param product Character: product code (e.g. `"t10011"`).
-#' @param measure Character: optional measure name. When provided, only
-#'   dimensions valid for that measure are returned (unless
-#'   `only_valid = FALSE`).
+#' @param measure Character vector of one or more measure names. When
+#'   provided, only dimensions valid for the measure(s) are returned
+#'   (unless `only_valid = FALSE`). Passing several measures restricts
+#'   the result to dimensions valid for *all* of them.
 #' @param only_valid Logical. When `measure` is provided and
 #'   `only_valid = TRUE` (default), dimensions with `option = FALSE` are
 #'   excluded. Set to `FALSE` to see all dimensions with their validity
@@ -40,6 +47,9 @@
 #'
 #'   # Validated against a specific measure
 #'   get_dimensions("t10011", measure = "itrfslut")
+#'
+#'   # Validated against several measures (intersection)
+#'   get_dimensions("t10011", measure = c("itrfslut", "nyregunder"))
 #'
 #'   # Inspect values for a dimension
 #'   get_dimensions("t10011") |> dimension_values("drivm")
