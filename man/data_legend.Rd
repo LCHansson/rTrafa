@@ -4,23 +4,46 @@
 \alias{data_legend}
 \title{Generate a source caption for plots}
 \usage{
-data_legend(data_df, struct_df = NULL)
+data_legend(data_df, lang = NULL, omit_varname = FALSE, omit_desc = FALSE)
 }
 \arguments{
 \item{data_df}{A tibble returned by \code{\link[=get_data]{get_data()}}.}
 
-\item{struct_df}{A tibble returned by \code{\link[=get_dimensions]{get_dimensions()}}. Optional.}
+\item{lang}{Language for the caption text: \code{"SV"} (Swedish, default)
+or \code{"EN"} (English). Defaults to \code{getOption("rTrafa.lang", "SV")}.
+Note that the product/measure labels are returned by the API in
+their default language regardless of this setting.}
+
+\item{omit_varname}{Logical. If \code{TRUE}, omit the variable codes (the
+parenthesised IDs like \code{t10011} and \code{itrfslut}).}
+
+\item{omit_desc}{Logical. If \code{TRUE}, omit the human-readable
+descriptions and show only the codes.}
 }
 \value{
-A character string suitable for plot captions.
+A single character string suitable for plot captions.
 }
 \description{
-Generate a source caption for plots
+Builds a human-readable source attribution string from a data tibble
+returned by \code{\link[=get_data]{get_data()}}. The string includes the product and measure
+along with their human-readable descriptions, and is suitable for use
+as a \code{caption} in \code{ggplot2::labs()}.
+}
+\details{
+By default the caption shows both the description and the code, e.g.
+\code{"Källa: Trafa; produkt: Bussar (t10011); mått: Antal i trafik (itrfslut)"}. Use \code{omit_varname} to drop the codes or \code{omit_desc} to
+drop the descriptions.
+
+Product and measure descriptions are looked up via \code{\link[=get_products]{get_products()}}
+and \code{\link[=get_measures]{get_measures()}} (cached on disk).
 }
 \examples{
 \donttest{
 if (trafa_available()) {
   d <- get_data("t10011", "itrfslut", ar = "2024")
   data_legend(d)
+  data_legend(d, lang = "EN")
+  data_legend(d, omit_varname = TRUE)
+  data_legend(d, omit_desc = TRUE)
 }}
 }

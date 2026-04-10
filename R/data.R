@@ -189,34 +189,110 @@ data_minimize <- function(data_df) {
 
 #' Generate a source caption for plots
 #'
+#' Builds a human-readable source attribution string from a data tibble
+#' returned by [get_data()]. The string includes the product and measure
+#' along with their human-readable descriptions, and is suitable for use
+#' as a `caption` in `ggplot2::labs()`.
+#'
+#' By default the caption shows both the description and the code, e.g.
+#' `"Källa: Trafa; produkt: Bussar (t10011); mått: Antal i trafik
+#' (itrfslut)"`. Use `omit_varname` to drop the codes or `omit_desc` to
+#' drop the descriptions.
+#'
+#' Product and measure descriptions are looked up via [get_products()]
+#' and [get_measures()] (cached on disk).
+#'
 #' @param data_df A tibble returned by [get_data()].
-#' @param struct_df A tibble returned by [get_dimensions()]. Optional.
-#' @return A character string suitable for plot captions.
+#' @param lang Language for the caption text: `"SV"` (Swedish, default)
+#'   or `"EN"` (English). Defaults to `getOption("rTrafa.lang", "SV")`.
+#'   Note that the product/measure labels are returned by the API in
+#'   their default language regardless of this setting.
+#' @param omit_varname Logical. If `TRUE`, omit the variable codes (the
+#'   parenthesised IDs like `t10011` and `itrfslut`).
+#' @param omit_desc Logical. If `TRUE`, omit the human-readable
+#'   descriptions and show only the codes.
+#' @return A single character string suitable for plot captions.
 #' @export
 #' @examples
 #' \donttest{
 #' if (trafa_available()) {
 #'   d <- get_data("t10011", "itrfslut", ar = "2024")
 #'   data_legend(d)
+#'   data_legend(d, lang = "EN")
+#'   data_legend(d, omit_varname = TRUE)
+#'   data_legend(d, omit_desc = TRUE)
 #' }}
-data_legend <- function(data_df, struct_df = NULL) {
+data_legend <- function(data_df,
+                        lang = NULL,
+                        omit_varname = FALSE,
+                        omit_desc = FALSE) {
   source_info <- attr(data_df, "trafa_source")
+  if (is.null(source_info)) return("")
 
-  parts <- character()
-  if (!is.null(source_info)) {
-    parts <- c(parts, paste0(
-      "Source: Trafa, product ", source_info$product,
-      ", measure ", source_info$measure
-    ))
-  }
+  lang <- resolve_lang(lang)
+  s <- legend_strings(lang)
 
-  if (!is.null(struct_df) && nrow(struct_df) > 0) {
-    dims <- struct_df[struct_df$type == "D", ]
-    if (nrow(dims) > 0) {
-      dim_labels <- paste(dims$label, paste0("(", dims$name, ")"), sep = " ")
-      parts <- c(parts, paste("Dimensions:", paste(dim_labels, collapse = " | ")))
-    }
-  }
+  product_code <- source_info$product
+  measure_code <- source_info$measure
 
-  paste(parts, collapse = "\n")
+  # Look up labels (cached)
+  product_label <- lookup_product_label(product_code, lang = lang)
+  measure_label <- lookup_measure_label(product_code, measure_code, lang = lang)
+
+  product_str <- format_legend_field(product_label, product_code,
+                                     omit_varname, omit_desc)
+  measure_str <- format_legend_field(measure_label, measure_code,
+                                     omit_varname, omit_desc)
+
+  paste0(
+    s$source, ": Trafa; ",
+    s$product, ": ", product_str, "; ",
+    s$measure, ": ", measure_str
+  )
+}
+
+#' @noRd
+legend_strings <- function(lang) {
+  switch(lang,
+    SV = list(source = "K\u00e4lla", product = "produkt", measure = "m\u00e5tt"),
+    EN = list(source = "Source", product = "product", measure = "measure")
+  )
+}
+
+#' Format one product or measure for the legend
+#' @noRd
+format_legend_field <- function(label, code, omit_varname, omit_desc) {
+  has_label <- !is.null(label) && !is.na(label) && nzchar(label)
+
+  if (omit_varname) return(if (has_label) label else code)
+  if (omit_desc || !has_label) return(code)
+  paste0(label, " (", code, ")")
+}
+
+#' Look up the human-readable label for a product code
+#' @noRd
+lookup_product_label <- function(product_code, lang = "SV") {
+  products <- tryCatch(
+    get_products(lang = lang, cache = TRUE),
+    error = function(e) NULL
+  )
+  if (is.null(products) || nrow(products) == 0) return(NA_character_)
+
+  row <- products[products$name == product_code, ]
+  if (nrow(row) == 0) return(NA_character_)
+  row$label[1]
+}
+
+#' Look up the human-readable label for a measure code
+#' @noRd
+lookup_measure_label <- function(product_code, measure_code, lang = "SV") {
+  measures <- tryCatch(
+    get_measures(product_code, lang = lang, cache = TRUE),
+    error = function(e) NULL
+  )
+  if (is.null(measures) || nrow(measures) == 0) return(NA_character_)
+
+  row <- measures[measures$name == measure_code, ]
+  if (nrow(row) == 0) return(NA_character_)
+  row$label[1]
 }
