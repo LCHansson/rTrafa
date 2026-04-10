@@ -33,6 +33,6 @@ if (trafa_available()) {
   trafa_clear_cache()
   trafa_clear_cache(entity = "products")
 }# }
-#> No rTrafa cache files found.
+#> Removed 4 cached file(s).
 #> No rTrafa cache files found.
 ```

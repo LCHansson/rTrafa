@@ -6,6 +6,10 @@ rTrafa as fast as possible. For a more comprehensive introduction, see
 rTrafa](https://lchansson.github.io/rTrafa/articles/introduction-to-rtrafa.md).
 
 ``` r
+install.packages("rTrafa")
+```
+
+``` r
 library("rTrafa")
 ```
 
@@ -191,12 +195,25 @@ dplyr::glimpse(bus_data)
 
 ### 5. Visualise
 
+Note how we convert the `ar` column to a proper `Date` before plotting.
+Trafa returns `ar` as a character column (`"2016"`, `"2017"`, …), and
+plotting it as an integer can produce awkward `ggplot2` breaks like
+`2020, 2022.5, 2025`. Wrapping it in `as.Date(paste0(ar, "-01-01"))`
+lets
+[`scale_x_date()`](https://ggplot2.tidyverse.org/reference/scale_date.html)
+place tick marks on whole years — a pattern worth reusing for any
+time-series analysis.
+
 ``` r
 library("ggplot2")
 
-ggplot(bus_data, aes(x = as.integer(ar), y = itrfslut)) +
+bus_plot <- bus_data |>
+  dplyr::mutate(year = as.Date(paste0(ar, "-01-01")))
+
+ggplot(bus_plot, aes(x = year, y = itrfslut)) +
   geom_line(linewidth = 1) +
   geom_point(size = 2) +
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
   scale_y_continuous(labels = scales::comma) +
   labs(
     title = "Buses in traffic in Sweden",
@@ -220,9 +237,12 @@ ggplot(bus_data, aes(x = as.integer(ar), y = itrfslut)) +
 
 ## Related packages
 
-If you work with other Swedish statistical APIs, see:
+`rTrafa` is part of a family of R packages for Swedish and Nordic open
+statistics that share the same design philosophy:
 
-- [rKolada](https://lchansson.github.io/rKolada/) — municipal and
-  regional KPIs from Kolada
-- [pixieweb](https://lchansson.github.io/pixieweb/) — PX-Web APIs
-  (Statistics Sweden, etc.)
+- [rKolada](https://lchansson.github.io/rKolada/) — R client for the
+  [Kolada](https://kolada.se/) database of Swedish municipal and
+  regional Key Performance Indicators
+- [pixieweb](https://lchansson.github.io/pixieweb/) — R client for
+  PX-Web APIs (Statistics Sweden, Statistics Norway, Statistics Finland,
+  and more)

@@ -1,5 +1,26 @@
 # Introduction to rTrafa
 
+`rTrafa` is an R package for *discovering*, *inspecting* and
+*downloading* Swedish transport statistics from the [Trafa
+API](https://api.trafa.se/). This vignette provides an overview of the
+methods included in the `rTrafa` package and the design principles of
+the package API. To learn more about the specifics of functions and to
+see a full list of the functions included, please see the [Reference
+section of the package
+homepage](https://lchansson.github.io/rTrafa/reference/index.html) or
+run `??rTrafa`. For a quick introduction to the package see the vignette
+[A quick start guide to
+rTrafa](https://lchansson.github.io/rTrafa/articles/a-quickstart-rtrafa.md).
+
+The design of `rTrafa` functions is inspired by the design and
+functionality provided by several packages in the `tidyverse` family.
+rTrafa uses the base R pipe (`|>`) throughout. Some vignette examples
+use `dplyr` and `ggplot2` for data wrangling and visualisation:
+
+``` r
+install.packages("rTrafa")
+```
+
 ``` r
 library("rTrafa")
 ```
@@ -271,6 +292,19 @@ get_dimensions("t10011", measure = "itrfslut")
 get_dimensions("t10011", measure = "itrfslut", only_valid = FALSE)
 ```
 
+You can also pass **several measures at once**. The API returns the
+intersection — only dimensions that are valid for *every* measure in the
+vector. This is useful when you want to compare or combine measures and
+need to know which filters you can apply uniformly:
+
+``` r
+# Dimensions valid for BOTH "vehicles in traffic" and "new registrations"
+get_dimensions("t10011", measure = c("itrfslut", "nyregunder"))
+```
+
+For Buses, only `ar` (year) survives this intersection — most other
+dimensions are specific to one measure or the other.
+
 ## Fetching data
 
 [`get_data()`](https://lchansson.github.io/rTrafa/reference/get_data.md)
@@ -333,17 +367,32 @@ generates a source caption for plots:
 
 ``` r
 data_legend(bus_data)
-#> [1] "Source: Trafa, product t10011, measure itrfslut"
+#> [1] "Källa: Trafa; produkt: Bussar (t10011); mått: Antal i trafik (itrfslut)"
 ```
 
 ## Example: buses in traffic over time
 
+Note how we convert the `ar` column to a proper `Date` before plotting.
+Trafa returns `ar` as a character column (`"2016"`, `"2017"`, …), and
+plotting it as an integer can produce awkward `ggplot2` breaks like
+`2020, 2022.5, 2025`. Wrapping it in `as.Date(paste0(ar, "-01-01"))`
+lets
+[`scale_x_date()`](https://ggplot2.tidyverse.org/reference/scale_date.html)
+place tick marks on whole years. This is a pattern you’ll want to reuse
+for any time-series analysis — both in `rTrafa` and in the sibling
+packages `rKolada` and `pixieweb`.
+
 ``` r
 library("ggplot2")
 
-ggplot(bus_data, aes(x = as.integer(ar), y = itrfslut)) +
+bus_plot <- bus_data |>
+  dplyr::mutate(year = as.Date(paste0(ar, "-01-01")))
+
+ggplot(bus_plot, aes(x = year, y = itrfslut)) +
   geom_line(linewidth = 1) +
   geom_point(size = 2) +
+  # Years as dates, one tick per year
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
   scale_y_continuous(labels = scales::comma) +
   labs(
     title = "Buses in traffic in Sweden",
@@ -354,7 +403,7 @@ ggplot(bus_data, aes(x = as.integer(ar), y = itrfslut)) +
   theme_minimal()
 ```
 
-![](introduction-to-rtrafa_files/figure-html/unnamed-chunk-29-1.png)
+![](introduction-to-rtrafa_files/figure-html/unnamed-chunk-30-1.png)
 
 ## Example: fuel type breakdown
 
@@ -383,7 +432,7 @@ ggplot(drivm_data, aes(
   theme(axis.text.x = element_text(angle = 35, hjust = 1))
 ```
 
-![](introduction-to-rtrafa_files/figure-html/unnamed-chunk-32-1.png)
+![](introduction-to-rtrafa_files/figure-html/unnamed-chunk-33-1.png)
 
 ## Example: comparing vehicle types
 
@@ -400,11 +449,13 @@ pbilar_data <- get_data("t10016", "itrfslut",
 comparison <- dplyr::bind_rows(
   bus_data |> dplyr::mutate(vehicle = "Buses"),
   pbilar_data |> dplyr::mutate(vehicle = "Passenger cars")
-)
+) |>
+  dplyr::mutate(year = as.Date(paste0(ar, "-01-01")))
 
-ggplot(comparison, aes(x = as.integer(ar), y = itrfslut, color = vehicle)) +
+ggplot(comparison, aes(x = year, y = itrfslut, color = vehicle)) +
   geom_line(linewidth = 1) +
   geom_point(size = 2) +
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
   scale_y_continuous(labels = scales::comma) +
   labs(
     title = "Vehicles in traffic in Sweden",
@@ -416,14 +467,17 @@ ggplot(comparison, aes(x = as.integer(ar), y = itrfslut, color = vehicle)) +
   theme(legend.position = "top")
 ```
 
-![](introduction-to-rtrafa_files/figure-html/unnamed-chunk-35-1.png)
+![](introduction-to-rtrafa_files/figure-html/unnamed-chunk-36-1.png)
 
 ## Related packages
 
-- [rKolada](https://lchansson.github.io/rKolada/) — municipal and
-  regional KPIs from Kolada
-- [pixieweb](https://lchansson.github.io/pixieweb/) — PX-Web APIs
-  (Statistics Sweden, Statistics Norway, etc.)
+`rTrafa` is part of a family of R packages for Swedish and Nordic open
+statistics that share the same design philosophy — tibble-based,
+pipe-friendly, and offline-safe:
 
-All three packages follow the same design philosophy: tibble-based,
-pipe-friendly, and offline-safe.
+- [rKolada](https://lchansson.github.io/rKolada/) — R client for the
+  [Kolada](https://kolada.se/) database of Swedish municipal and
+  regional Key Performance Indicators
+- [pixieweb](https://lchansson.github.io/pixieweb/) — R client for
+  PX-Web APIs (Statistics Sweden, Statistics Norway, Statistics Finland,
+  and more)

@@ -52,8 +52,96 @@
   </div>
 </nav><div class="container template-home">
 <div class="row">
-  <main id="main" class="col-md-9">
-A pipe-friendly R client for the Trafa statistical API (api.trafa.se). Provides a search-then-fetch workflow for discovering and downloading Swedish transport and infrastructure data using a consistent tibble-based interface.
+  <main id="main" class="col-md-9"><div class="section level1">
+<div class="page-header"><h1 id="rtrafa-">rTrafa <img src="reference/figures/logo.png" align="right" height="139" alt=""><a class="anchor" aria-label="anchor" href="#rtrafa-"></a>
+</h1></div>
+<!-- badges: start -->
+
+<p><a href="https://lchansson.github.io/rTrafa/index.html"><code>rTrafa</code></a> is an R package for <em>discovering</em>, <em>inspecting</em> and <em>downloading</em> Swedish transport statistics from the <a href="https://api.trafa.se/" class="external-link">Trafa API</a> — the open database maintained by Trafikanalys, Sweden’s agency for transport analysis. It covers road, rail, sea and air transport; vehicles in traffic; new registrations; passenger and freight volumes; and more.</p>
+<p>To learn more about using <code>rTrafa</code>, it is recommended you use the following resources in order:</p>
+<div class="section level2">
+<h2 id="getting-started-with-rtrafa">Getting started with rTrafa<a class="anchor" aria-label="anchor" href="#getting-started-with-rtrafa"></a>
+</h2>
+<ol style="list-style-type: decimal">
+<li>To get up and running quickly with rTrafa, please see the vignette <a href="https://lchansson.github.io/rTrafa/articles/a-quickstart-rtrafa.html">A quick start guide to rTrafa</a>.</li>
+<li>For an introduction to rTrafa and the design principles of functions included, please see <a href="https://lchansson.github.io/rTrafa/articles/introduction-to-rtrafa.html">Introduction to rTrafa</a>.</li>
+<li>See the <a href="https://lchansson.github.io/rTrafa/reference/index.html">Reference section of the package homepage</a> to learn about the full set of functionality included with the package.</li>
+</ol>
+<p><code>rTrafa</code> is open source licensed under the Affero Gnu Public License version 3. This means you are free to download the source, modify and redistribute it as you please, but any copies or modifications must retain the original license. Please see the file LICENSE.md for further information.</p>
+</div>
+<div class="section level2">
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h2>
+<p>rTrafa is on CRAN. To install it, run the following code in R:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"rTrafa"</span><span class="op">)</span></span></code></pre></div>
+<p>To install the latest development version from GitHub, use the <code>remotes</code> package:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://remotes.r-lib.org" class="external-link">"remotes"</a></span><span class="op">)</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"LCHansson/rTrafa"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
+</h2>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lchansson.github.io/rTrafa/">rTrafa</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># List the available statistical products</span></span>
+<span><span class="va">products</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_products.html">get_products</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Inspect the measures available for "Buses" (product t10011)</span></span>
+<span><span class="va">measures</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_measures.html">get_measures</a></span><span class="op">(</span><span class="st">"t10011"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Download "Vehicles in traffic" for the last ten years</span></span>
+<span><span class="va">bus_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_data.html">get_data</a></span><span class="op">(</span><span class="st">"t10011"</span>, <span class="st">"itrfslut"</span>,</span>
+<span>  ar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="fl">2016</span><span class="op">:</span><span class="fl">2025</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="features">Features<a class="anchor" aria-label="anchor" href="#features"></a>
+</h2>
+<ul>
+<li>
+<strong>Search-then-fetch workflow</strong>: Discover products, inspect measures and dimensions, then download data</li>
+<li>
+<strong>Three-level data model</strong>: Products → measures → dimensions, mirrored by <code><a href="reference/get_products.html">get_products()</a></code>, <code><a href="reference/get_measures.html">get_measures()</a></code> and <code><a href="reference/get_dimensions.html">get_dimensions()</a></code>
+</li>
+<li>
+<strong>Filter shortcuts</strong>: Use <code>ar = "senaste"</code> for the latest period without hardcoding years</li>
+<li>
+<strong>Dimension validation</strong>: <code><a href="reference/prepare_query.html">prepare_query()</a></code> checks that your filters are compatible with the selected measure before hitting the data endpoint</li>
+<li>
+<strong>Offline-safe examples</strong>: <code><a href="reference/trafa_available.html">trafa_available()</a></code> guards all network calls so examples and tests degrade gracefully when the API is down</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="contributing">Contributing<a class="anchor" aria-label="anchor" href="#contributing"></a>
+</h2>
+<p>You are welcome to contribute to the further development of the rTrafa package in any of the following ways:</p>
+<ul>
+<li>Open an <a href="https://github.com/LCHansson/rTrafa/issues" class="external-link">issue</a>
+</li>
+<li>Clone this repo, make modifications and create a pull request</li>
+<li>Spread the word!</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="related-packages">Related packages<a class="anchor" aria-label="anchor" href="#related-packages"></a>
+</h2>
+<p><code>rTrafa</code> is part of a family of R packages for Swedish and Nordic open statistics that share the same design philosophy — tibble-based, pipe-friendly, and offline-safe:</p>
+<ul>
+<li>
+<a href="https://lchansson.github.io/rKolada/" class="external-link">rKolada</a> — R client for the <a href="https://kolada.se/" class="external-link">Kolada</a> database of Swedish municipal and regional Key Performance Indicators</li>
+<li>
+<a href="https://lchansson.github.io/pixieweb/" class="external-link">pixieweb</a> — R client for PX-Web APIs (Statistics Sweden, Statistics Norway, Statistics Finland, and more)</li>
+</ul>
+<div class="section level3">
+<h3 id="code-of-conduct">Code of Conduct<a class="anchor" aria-label="anchor" href="#code-of-conduct"></a>
+</h3>
+<p>Please note that the rTrafa project is released with a <a href="https://contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html" class="external-link">Contributor Code of Conduct</a>. By contributing to this project, you agree to abide by its terms.</p>
+</div>
+</div>
+</div>
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
@@ -84,7 +172,12 @@ A pipe-friendly R client for the Trafa statistical API (api.trafa.se). Provides 
 </ul>
 </div>
 
-
+<div class="dev-status">
+<h2 data-toc-skip>Dev status</h2>
+<ul class="list-unstyled">
+<li><a href="https://github.com/lchansson/rTrafa/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/lchansson/rTrafa/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
+</ul>
+</div>
 
   </aside>
 </div>

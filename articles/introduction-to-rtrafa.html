@@ -65,7 +65,24 @@
 
     
     
+<p><code>rTrafa</code> is an R package for <em>discovering</em>,
+<em>inspecting</em> and <em>downloading</em> Swedish transport
+statistics from the <a href="https://api.trafa.se/" class="external-link">Trafa API</a>. This
+vignette provides an overview of the methods included in the
+<code>rTrafa</code> package and the design principles of the package
+API. To learn more about the specifics of functions and to see a full
+list of the functions included, please see the <a href="https://lchansson.github.io/rTrafa/reference/index.html">Reference
+section of the package homepage</a> or run <code>??rTrafa</code>. For a
+quick introduction to the package see the vignette <a href="a-quickstart-rtrafa.html">A quick start guide to rTrafa</a>.</p>
+<p>The design of <code>rTrafa</code> functions is inspired by the design
+and functionality provided by several packages in the
+<code>tidyverse</code> family. rTrafa uses the base R pipe
+(<code>|&gt;</code>) throughout. Some vignette examples use
+<code>dplyr</code> and <code>ggplot2</code> for data wrangling and
+visualisation:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"rTrafa"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://lchansson.github.io/rTrafa/">"rTrafa"</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="trafas-data-model">Trafa’s data model<a class="anchor" aria-label="anchor" href="#trafas-data-model"></a>
@@ -145,10 +162,10 @@ levels:</p>
 <div class="section level2">
 <h2 id="products">Products<a class="anchor" aria-label="anchor" href="#products"></a>
 </h2>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">products</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_products.html">get_products</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>The product table has one row per statistical product:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="va">products</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: 56</span></span>
 <span><span class="co">#&gt; Columns: 5</span></span>
@@ -159,7 +176,7 @@ levels:</p>
 <span><span class="co">#&gt; $ active_from <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "2019-01-10T10:17:00"<span style="color: #949494;">, </span>"2019-01-10T10:25:00"<span style="color: #949494;">, </span>"2019-01-10T…</span></span></code></pre></div>
 <p>All entity tables support the same set of operations.
 <code><a href="../reference/product_search.html">product_search()</a></code> filters by regex:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">products</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/product_search.html">product_search</a></span><span class="op">(</span><span class="st">"Personbilar"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/product_describe.html">product_describe</a></span><span class="op">(</span>max_n <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
@@ -176,7 +193,7 @@ levels:</p>
 <p><code><a href="../reference/product_extract_ids.html">product_extract_ids()</a></code> extracts the <code>name</code>
 column as a character vector — useful for passing into downstream
 functions:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">products</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/product_search.html">product_search</a></span><span class="op">(</span><span class="st">"Personbilar"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/product_extract_ids.html">product_extract_ids</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -189,9 +206,9 @@ functions:</p>
 statistic being observed — for example, <em>Antal i trafik</em>
 (vehicles in traffic) or <em>Antal nyregistreringar</em> (new
 registrations).</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">measures</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_measures.html">get_measures</a></span><span class="op">(</span><span class="st">"t10011"</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">measures</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_measures.html">get_measures</a></span><span class="op">(</span><span class="st">"t10011"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">measures</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/measure_describe.html">measure_describe</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ── itrfslut (Antal i trafik) ──────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;   Product: t10011</span></span>
@@ -209,7 +226,7 @@ registrations).</p>
 <span><span class="co">#&gt;   Product: t10011</span></span>
 <span><span class="co">#&gt;   Description: Avser under perioden</span></span></code></pre></div>
 <p>Extract the names to use in <code><a href="../reference/get_data.html">get_data()</a></code>:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">measures</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/measure_extract_names.html">measure_extract_names</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "itrfslut"   "avstslut"   "nyregunder" "avregunder"</span></span></code></pre></div>
 </div>
@@ -218,9 +235,9 @@ registrations).</p>
 </h2>
 <p>Dimensions are the filter variables available for a product. Use
 <code><a href="../reference/get_dimensions.html">get_dimensions()</a></code> to discover them:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">dims</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_dimensions.html">get_dimensions</a></span><span class="op">(</span><span class="st">"t10011"</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">dims</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_dimensions.html">get_dimensions</a></span><span class="op">(</span><span class="st">"t10011"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dims</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/dimension_describe.html">dimension_describe</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ── ar (År) ────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;   Data type: Time</span></span>
@@ -268,7 +285,7 @@ dimensions marked with <code>[agare]</code> belong to the “Owner”
 hierarchy. This is metadata that helps you understand the logical
 structure — but when building a query, you use the child dimension names
 directly (e.g. <code>agarkat</code>, not <code>agare</code>).</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dims</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">hierarchy</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 9</span></span></span>
@@ -282,9 +299,9 @@ directly (e.g. <code>agarkat</code>, not <code>agare</code>).</p>
 </h3>
 <p>Each dimension has a set of valid values.
 <code><a href="../reference/dimension_values.html">dimension_values()</a></code> returns them as a tibble:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ar_vals</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dimension_values.html">dimension_values</a></span><span class="op">(</span><span class="va">dims</span>, <span class="st">"ar"</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ar_vals</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dimension_values.html">dimension_values</a></span><span class="op">(</span><span class="va">dims</span>, <span class="st">"ar"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ar_vals</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 27 × 3</span></span></span>
 <span><span class="co">#&gt;    name    label      type  </span></span>
@@ -311,14 +328,14 @@ dynamic values that the API resolves at query time:</p>
 </ul>
 <p>These are useful for building queries that stay current without
 hardcoding years:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Always gets the latest year, regardless of when you run it</span></span>
 <span><span class="fu"><a href="../reference/get_data.html">get_data</a></span><span class="op">(</span><span class="st">"t10011"</span>, <span class="st">"itrfslut"</span>, ar <span class="op">=</span> <span class="st">"senaste"</span><span class="op">)</span></span></code></pre></div>
 <p>Regular dimension values (<code>type = "value"</code>) can be
 inspected too:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">drivm_vals</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dimension_values.html">dimension_values</a></span><span class="op">(</span><span class="va">dims</span>, <span class="st">"drivm"</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">drivm_vals</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dimension_values.html">dimension_values</a></span><span class="op">(</span><span class="va">dims</span>, <span class="st">"drivm"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">drivm_vals</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 10 × 3</span></span></span>
 <span><span class="co">#&gt;    name  label      type </span></span>
@@ -339,12 +356,22 @@ inspected too:</p>
 </h3>
 <p>When you know which measure you want, <code><a href="../reference/get_dimensions.html">get_dimensions()</a></code>
 can validate which dimensions are compatible:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Only dimensions valid for the "itrfslut" measure</span></span>
 <span><span class="fu"><a href="../reference/get_dimensions.html">get_dimensions</a></span><span class="op">(</span><span class="st">"t10011"</span>, measure <span class="op">=</span> <span class="st">"itrfslut"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># See all dimensions with their validity status</span></span>
 <span><span class="fu"><a href="../reference/get_dimensions.html">get_dimensions</a></span><span class="op">(</span><span class="st">"t10011"</span>, measure <span class="op">=</span> <span class="st">"itrfslut"</span>, only_valid <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<p>You can also pass <strong>several measures at once</strong>. The API
+returns the intersection — only dimensions that are valid for
+<em>every</em> measure in the vector. This is useful when you want to
+compare or combine measures and need to know which filters you can apply
+uniformly:</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Dimensions valid for BOTH "vehicles in traffic" and "new registrations"</span></span>
+<span><span class="fu"><a href="../reference/get_dimensions.html">get_dimensions</a></span><span class="op">(</span><span class="st">"t10011"</span>, measure <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"itrfslut"</span>, <span class="st">"nyregunder"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>For Buses, only <code>ar</code> (year) survives this intersection —
+most other dimensions are specific to one measure or the other.</p>
 </div>
 </div>
 <div class="section level2">
@@ -352,11 +379,11 @@ can validate which dimensions are compatible:</p>
 </h2>
 <p><code><a href="../reference/get_data.html">get_data()</a></code> is the core function. Provide a product, a
 measure, and optional dimension filters:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bus_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_data.html">get_data</a></span><span class="op">(</span><span class="st">"t10011"</span>, <span class="st">"itrfslut"</span>,</span>
 <span>  ar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="fl">2016</span><span class="op">:</span><span class="fl">2025</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="va">bus_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: 10</span></span>
 <span><span class="co">#&gt; Columns: 3</span></span>
@@ -371,7 +398,7 @@ human-readable name.</p>
 </h3>
 <p>For complex queries, <code><a href="../reference/prepare_query.html">prepare_query()</a></code> validates your
 selections before hitting the data endpoint:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">q</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_query.html">prepare_query</a></span><span class="op">(</span><span class="st">"t10011"</span>, <span class="st">"itrfslut"</span>,</span>
 <span>  ar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2023"</span>, <span class="st">"2024"</span><span class="op">)</span>,</span>
 <span>  drivm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"101"</span>, <span class="st">"102"</span>, <span class="st">"103"</span><span class="op">)</span></span>
@@ -391,24 +418,39 @@ selections before hitting the data endpoint:</p>
 </h3>
 <p><code><a href="../reference/data_minimize.html">data_minimize()</a></code> removes columns where all values are
 identical — useful after filtering to a single year or fuel type:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_data.html">get_data</a></span><span class="op">(</span><span class="st">"t10011"</span>, <span class="st">"itrfslut"</span>, ar <span class="op">=</span> <span class="st">"2024"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/data_minimize.html">data_minimize</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><code><a href="../reference/data_legend.html">data_legend()</a></code> generates a source caption for plots:</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/data_legend.html">data_legend</a></span><span class="op">(</span><span class="va">bus_data</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Source: Trafa, product t10011, measure itrfslut"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "Källa: Trafa; produkt: Bussar (t10011); mått: Antal i trafik (itrfslut)"</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
 <h2 id="example-buses-in-traffic-over-time">Example: buses in traffic over time<a class="anchor" aria-label="anchor" href="#example-buses-in-traffic-over-time"></a>
 </h2>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<p>Note how we convert the <code>ar</code> column to a proper
+<code>Date</code> before plotting. Trafa returns <code>ar</code> as a
+character column (<code>"2016"</code>, <code>"2017"</code>, …), and
+plotting it as an integer can produce awkward <code>ggplot2</code>
+breaks like <code>2020, 2022.5, 2025</code>. Wrapping it in
+<code>as.Date(paste0(ar, "-01-01"))</code> lets
+<code><a href="https://ggplot2.tidyverse.org/reference/scale_date.html" class="external-link">scale_x_date()</a></code> place tick marks on whole years. This is a
+pattern you’ll want to reuse for any time-series analysis — both in
+<code>rTrafa</code> and in the sibling packages <code>rKolada</code> and
+<code>pixieweb</code>.</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://ggplot2.tidyverse.org" class="external-link">"ggplot2"</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">bus_data</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">ar</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">itrfslut</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="va">bus_plot</span> <span class="op">&lt;-</span> <span class="va">bus_data</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">ar</span>, <span class="st">"-01-01"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">bus_plot</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">year</span>, y <span class="op">=</span> <span class="va">itrfslut</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="co"># Years as dates, one tick per year</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_date.html" class="external-link">scale_x_date</a></span><span class="op">(</span>date_breaks <span class="op">=</span> <span class="st">"1 year"</span>, date_labels <span class="op">=</span> <span class="st">"%Y"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org/reference/comma.html" class="external-link">comma</a></span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>    title <span class="op">=</span> <span class="st">"Buses in traffic in Sweden"</span>,</span>
@@ -417,17 +459,17 @@ identical — useful after filtering to a single year or fuel type:</p>
 <span>    caption <span class="op">=</span> <span class="fu"><a href="../reference/data_legend.html">data_legend</a></span><span class="op">(</span><span class="va">bus_data</span><span class="op">)</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="introduction-to-rtrafa_files/figure-html/unnamed-chunk-29-1.png" class="r-plt" alt="" width="576"></p>
+<p><img src="introduction-to-rtrafa_files/figure-html/unnamed-chunk-30-1.png" class="r-plt" alt="" width="576"></p>
 </div>
 <div class="section level2">
 <h2 id="example-fuel-type-breakdown">Example: fuel type breakdown<a class="anchor" aria-label="anchor" href="#example-fuel-type-breakdown"></a>
 </h2>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">drivm_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_data.html">get_data</a></span><span class="op">(</span><span class="st">"t10011"</span>, <span class="st">"itrfslut"</span>,</span>
 <span>  ar <span class="op">=</span> <span class="st">"senaste"</span>,</span>
 <span>  drivm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"101"</span>, <span class="st">"102"</span>, <span class="st">"103"</span>, <span class="st">"104"</span>, <span class="st">"105"</span>, <span class="st">"106"</span>, <span class="st">"107"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">drivm_data</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span></span>
 <span>  x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html" class="external-link">reorder</a></span><span class="op">(</span><span class="va">drivm_label</span>, <span class="op">-</span><span class="va">itrfslut</span><span class="op">)</span>,</span>
 <span>  y <span class="op">=</span> <span class="va">itrfslut</span></span>
@@ -443,26 +485,28 @@ identical — useful after filtering to a single year or fuel type:</p>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">35</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="introduction-to-rtrafa_files/figure-html/unnamed-chunk-32-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="introduction-to-rtrafa_files/figure-html/unnamed-chunk-33-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level2">
 <h2 id="example-comparing-vehicle-types">Example: comparing vehicle types<a class="anchor" aria-label="anchor" href="#example-comparing-vehicle-types"></a>
 </h2>
 <p>By fetching the same measure from different products we can compare
 across vehicle types:</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pbilar_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_data.html">get_data</a></span><span class="op">(</span><span class="st">"t10016"</span>, <span class="st">"itrfslut"</span>,</span>
 <span>  ar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="fl">2016</span><span class="op">:</span><span class="fl">2025</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span></span>
 <span>  <span class="va">bus_data</span> <span class="op">|&gt;</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>vehicle <span class="op">=</span> <span class="st">"Buses"</span><span class="op">)</span>,</span>
 <span>  <span class="va">pbilar_data</span> <span class="op">|&gt;</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>vehicle <span class="op">=</span> <span class="st">"Passenger cars"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
+<span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">ar</span>, <span class="st">"-01-01"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">comparison</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">ar</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">itrfslut</span>, color <span class="op">=</span> <span class="va">vehicle</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">comparison</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">year</span>, y <span class="op">=</span> <span class="va">itrfslut</span>, color <span class="op">=</span> <span class="va">vehicle</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_date.html" class="external-link">scale_x_date</a></span><span class="op">(</span>date_breaks <span class="op">=</span> <span class="st">"1 year"</span>, date_labels <span class="op">=</span> <span class="st">"%Y"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org/reference/comma.html" class="external-link">comma</a></span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>    title <span class="op">=</span> <span class="st">"Vehicles in traffic in Sweden"</span>,</span>
@@ -472,21 +516,24 @@ across vehicle types:</p>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"top"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="introduction-to-rtrafa_files/figure-html/unnamed-chunk-35-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="introduction-to-rtrafa_files/figure-html/unnamed-chunk-36-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level2">
 <h2 id="related-packages">Related packages<a class="anchor" aria-label="anchor" href="#related-packages"></a>
 </h2>
+<p><code>rTrafa</code> is part of a family of R packages for Swedish and
+Nordic open statistics that share the same design philosophy —
+tibble-based, pipe-friendly, and offline-safe:</p>
 <ul>
 <li>
-<a href="https://lchansson.github.io/rKolada/" class="external-link">rKolada</a> —
-municipal and regional KPIs from Kolada</li>
+<a href="https://lchansson.github.io/rKolada/" class="external-link">rKolada</a> — R
+client for the <a href="https://kolada.se/" class="external-link">Kolada</a> database of
+Swedish municipal and regional Key Performance Indicators</li>
 <li>
-<a href="https://lchansson.github.io/pixieweb/" class="external-link">pixieweb</a> —
-PX-Web APIs (Statistics Sweden, Statistics Norway, etc.)</li>
+<a href="https://lchansson.github.io/pixieweb/" class="external-link">pixieweb</a> — R
+client for PX-Web APIs (Statistics Sweden, Statistics Norway, Statistics
+Finland, and more)</li>
 </ul>
-<p>All three packages follow the same design philosophy: tibble-based,
-pipe-friendly, and offline-safe.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

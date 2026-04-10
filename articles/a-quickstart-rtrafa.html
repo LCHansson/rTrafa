@@ -69,6 +69,8 @@
 rTrafa as fast as possible. For a more comprehensive introduction, see
 <a href="introduction-to-rtrafa.html">Introduction to rTrafa</a>.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"rTrafa"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://lchansson.github.io/rTrafa/">"rTrafa"</a></span><span class="op">)</span></span></code></pre></div>
 <p>In this guide we walk you through five steps to discover products,
 explore their structure, download data and visualise it.</p>
@@ -82,9 +84,9 @@ product, a measure, and optionally dimension filters.</p>
 </h3>
 <p>Trafa publishes dozens of statistical products. Start by listing
 them:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">products</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_products.html">get_products</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">products</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_products.html">get_products</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="va">products</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: 56</span></span>
 <span><span class="co">#&gt; Columns: 5</span></span>
@@ -94,7 +96,7 @@ them:</p>
 <span><span class="co">#&gt; $ id          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 203<span style="color: #949494;">, </span>206<span style="color: #949494;">, </span>207<span style="color: #949494;">, </span>209<span style="color: #949494;">, </span>210<span style="color: #949494;">, </span>211<span style="color: #949494;">, </span>222<span style="color: #949494;">, </span>227<span style="color: #949494;">, </span>231<span style="color: #949494;">, </span>232<span style="color: #949494;">, </span>233<span style="color: #949494;">, </span>234…</span></span>
 <span><span class="co">#&gt; $ active_from <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "2019-01-10T10:17:00"<span style="color: #949494;">, </span>"2019-01-10T10:25:00"<span style="color: #949494;">, </span>"2019-01-10T…</span></span></code></pre></div>
 <p>Use <code><a href="../reference/product_search.html">product_search()</a></code> to filter by text:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">products</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/product_search.html">product_search</a></span><span class="op">(</span><span class="st">"Bussar"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/product_describe.html">product_describe</a></span><span class="op">(</span>max_n <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
@@ -115,9 +117,9 @@ them:</p>
 </h3>
 <p>Each product has several measures (KPIs). Let’s see what’s available
 for Buses (t10011):</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">measures</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_measures.html">get_measures</a></span><span class="op">(</span><span class="st">"t10011"</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">measures</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_measures.html">get_measures</a></span><span class="op">(</span><span class="st">"t10011"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">measures</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/measure_describe.html">measure_describe</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ── itrfslut (Antal i trafik) ──────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;   Product: t10011</span></span>
@@ -140,9 +142,9 @@ for Buses (t10011):</p>
 </h3>
 <p>Dimensions are the variables you can filter on. Use
 <code><a href="../reference/get_dimensions.html">get_dimensions()</a></code> to discover them:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">dims</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_dimensions.html">get_dimensions</a></span><span class="op">(</span><span class="st">"t10011"</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">dims</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_dimensions.html">get_dimensions</a></span><span class="op">(</span><span class="st">"t10011"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dims</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/dimension_describe.html">dimension_describe</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ── ar (År) ────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;   Data type: Time</span></span>
@@ -186,9 +188,9 @@ for Buses (t10011):</p>
 (shown in brackets). These are grouped conceptually but each is queried
 independently.</p>
 <p>You can inspect the available values for any dimension:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ar_vals</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dimension_values.html">dimension_values</a></span><span class="op">(</span><span class="va">dims</span>, <span class="st">"ar"</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ar_vals</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dimension_values.html">dimension_values</a></span><span class="op">(</span><span class="va">dims</span>, <span class="st">"ar"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ar_vals</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 27 × 3</span></span></span>
 <span><span class="co">#&gt;    name    label      type  </span></span>
@@ -213,11 +215,11 @@ shortcuts that the API resolves dynamically.</p>
 </h3>
 <p>Now let’s fetch data. We request the number of buses in traffic for
 the last 10 years:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bus_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_data.html">get_data</a></span><span class="op">(</span><span class="st">"t10011"</span>, <span class="st">"itrfslut"</span>,</span>
 <span>  ar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="fl">2016</span><span class="op">:</span><span class="fl">2025</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="va">bus_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: 10</span></span>
 <span><span class="co">#&gt; Columns: 3</span></span>
@@ -228,12 +230,24 @@ the last 10 years:</p>
 <div class="section level3">
 <h3 id="visualise">5. Visualise<a class="anchor" aria-label="anchor" href="#visualise"></a>
 </h3>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<p>Note how we convert the <code>ar</code> column to a proper
+<code>Date</code> before plotting. Trafa returns <code>ar</code> as a
+character column (<code>"2016"</code>, <code>"2017"</code>, …), and
+plotting it as an integer can produce awkward <code>ggplot2</code>
+breaks like <code>2020, 2022.5, 2025</code>. Wrapping it in
+<code>as.Date(paste0(ar, "-01-01"))</code> lets
+<code><a href="https://ggplot2.tidyverse.org/reference/scale_date.html" class="external-link">scale_x_date()</a></code> place tick marks on whole years — a pattern
+worth reusing for any time-series analysis.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://ggplot2.tidyverse.org" class="external-link">"ggplot2"</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">bus_data</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">ar</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">itrfslut</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="va">bus_plot</span> <span class="op">&lt;-</span> <span class="va">bus_data</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">ar</span>, <span class="st">"-01-01"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">bus_plot</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">year</span>, y <span class="op">=</span> <span class="va">itrfslut</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_date.html" class="external-link">scale_x_date</a></span><span class="op">(</span>date_breaks <span class="op">=</span> <span class="st">"1 year"</span>, date_labels <span class="op">=</span> <span class="st">"%Y"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org/reference/comma.html" class="external-link">comma</a></span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>    title <span class="op">=</span> <span class="st">"Buses in traffic in Sweden"</span>,</span>
@@ -260,14 +274,17 @@ to always get the latest year without hardcoding.</li>
 <div class="section level2">
 <h2 id="related-packages">Related packages<a class="anchor" aria-label="anchor" href="#related-packages"></a>
 </h2>
-<p>If you work with other Swedish statistical APIs, see:</p>
+<p><code>rTrafa</code> is part of a family of R packages for Swedish and
+Nordic open statistics that share the same design philosophy:</p>
 <ul>
 <li>
-<a href="https://lchansson.github.io/rKolada/" class="external-link">rKolada</a> —
-municipal and regional KPIs from Kolada</li>
+<a href="https://lchansson.github.io/rKolada/" class="external-link">rKolada</a> — R
+client for the <a href="https://kolada.se/" class="external-link">Kolada</a> database of
+Swedish municipal and regional Key Performance Indicators</li>
 <li>
-<a href="https://lchansson.github.io/pixieweb/" class="external-link">pixieweb</a> —
-PX-Web APIs (Statistics Sweden, etc.)</li>
+<a href="https://lchansson.github.io/pixieweb/" class="external-link">pixieweb</a> — R
+client for PX-Web APIs (Statistics Sweden, Statistics Norway, Statistics
+Finland, and more)</li>
 </ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
