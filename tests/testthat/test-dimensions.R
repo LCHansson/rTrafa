@@ -65,6 +65,24 @@ test_that("get_dimensions includes F-type filters in values", {
   expect_equal(result$n_values[1], 1L)
 })
 
+test_that("get_dimensions accepts a vector of measures", {
+  captured_extra <- NULL
+  local_mocked_bindings(
+    get_structure_raw = function(product, ..., lang = NULL, cache = FALSE,
+                                 cache_location = NULL, verbose = FALSE) {
+      captured_extra <<- as.character(c(...))
+      list(
+        list(Type = "D", Name = "ar", Label = "Year", DataType = "Time",
+             Option = TRUE, Description = "", StructureItems = list())
+      )
+    }
+  )
+
+  result <- get_dimensions("t10011", measure = c("itrfslut", "nyregunder"))
+  expect_equal(captured_extra, c("itrfslut", "nyregunder"))
+  expect_equal(nrow(result), 1)
+})
+
 test_that("get_dimensions excludes invalid dims when only_valid = TRUE", {
   mock_items <- list(
     list(Type = "D", Name = "ar", Label = "Year", DataType = "Time",

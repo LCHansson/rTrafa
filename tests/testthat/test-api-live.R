@@ -59,6 +59,39 @@ test_that("product pipeline works end-to-end", {
   expect_type(result, "character")
 })
 
+test_that("get_dimensions with multi-measure returns intersection", {
+  # itrfslut + nyregunder for Bussar should narrow to (mostly) just 'ar'
+  multi <- get_dimensions("t10011", measure = c("itrfslut", "nyregunder"))
+  single_a <- get_dimensions("t10011", measure = "itrfslut")
+  single_b <- get_dimensions("t10011", measure = "nyregunder")
+
+  # Multi result should be a subset of each single result
+  expect_true(all(multi$name %in% single_a$name))
+  expect_true(all(multi$name %in% single_b$name))
+})
+
+test_that("data_legend produces formatted caption with descriptions", {
+  data <- get_data("t10011", "itrfslut", ar = "2024")
+  legend <- data_legend(data)
+  expect_match(legend, "K\u00e4lla: Trafa")
+  expect_match(legend, "produkt:")
+  expect_match(legend, "m\u00e5tt:")
+  expect_match(legend, "t10011")
+  expect_match(legend, "itrfslut")
+})
+
+test_that("data_legend respects omit_varname and omit_desc", {
+  data <- get_data("t10011", "itrfslut", ar = "2024")
+
+  no_codes <- data_legend(data, omit_varname = TRUE)
+  expect_false(grepl("t10011", no_codes))
+  expect_false(grepl("itrfslut", no_codes))
+
+  no_labels <- data_legend(data, omit_desc = TRUE)
+  expect_match(no_labels, "t10011")
+  expect_match(no_labels, "itrfslut")
+})
+
 test_that("full discovery workflow: products -> measures -> dimensions -> data", {
   products <- get_products()
   pid <- product_extract_ids(product_search(products, "Bussar"))
