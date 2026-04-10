@@ -1,0 +1,319 @@
+---
+title: "Introduction to rTrafa"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to rTrafa}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library("rTrafa")
+```
+
+## Trafa's data model
+
+The Trafa API organises Swedish transport statistics in a four-level hierarchy:
+
+1. **Product** — A statistical domain, e.g. *Buses* (t10011) or *Passenger cars* (t10016). Think of it as a family of related statistics.
+2. **Measure** — A specific KPI within a product. Buses has four measures: vehicles in traffic, deregistered, newly registered, and deregistrations.
+3. **Dimension** — A filterable variable such as year, fuel type, or owner category. Each dimension has discrete values you can select.
+4. **Value** — The individual codes within a dimension (e.g. `"2024"`, `"102"` for Diesel).
+
+There is also a grouping concept called **Hierarchy**. A hierarchy like "Owner" groups related dimensions ("Owner category" and "Licence type") together. Hierarchies are purely organisational — they cannot be used directly in queries. Their child dimensions appear in `get_dimensions()` with the hierarchy name noted in the `hierarchy` column.
+
+rTrafa provides a function family for each of the first three levels:
+
+| Level | List | Search | Describe | Extract | Values |
+|-------|------|--------|----------|---------|--------|
+| Product | `get_products()` | `product_search()` | `product_describe()` | `product_extract_ids()` | — |
+| Measure | `get_measures()` | `measure_search()` | `measure_describe()` | `measure_extract_names()` | — |
+| Dimension | `get_dimensions()` | `dimension_search()` | `dimension_describe()` | `dimension_extract_names()` | `dimension_values()` |
+
+## Products
+
+```{r, echo = FALSE}
+products <- rTrafa:::vd_products
+```
+
+```{r, eval = FALSE}
+products <- get_products()
+```
+
+The product table has one row per statistical product:
+
+```{r}
+dplyr::glimpse(products)
+```
+
+All entity tables support the same set of operations. `product_search()` filters by regex:
+
+```{r}
+products |>
+  product_search("Personbilar") |>
+  product_describe(max_n = 2)
+```
+
+`product_extract_ids()` extracts the `name` column as a character vector — useful for passing into downstream functions:
+
+```{r}
+products |>
+  product_search("Personbilar") |>
+  product_extract_ids()
+```
+
+## Measures
+
+Each product contains one or more measures. A measure is the statistic being observed — for example, *Antal i trafik* (vehicles in traffic) or *Antal nyregistreringar* (new registrations).
+
+```{r, echo = FALSE}
+measures <- rTrafa:::vd_measures_bussar
+```
+
+```{r, eval = FALSE}
+measures <- get_measures("t10011")
+```
+
+```{r}
+measures |> measure_describe()
+```
+
+Extract the names to use in `get_data()`:
+
+```{r}
+measures |> measure_extract_names()
+```
+
+## Dimensions
+
+Dimensions are the filter variables available for a product. Use `get_dimensions()` to discover them:
+
+```{r, echo = FALSE}
+dims <- rTrafa:::vd_dims_bussar
+```
+
+```{r, eval = FALSE}
+dims <- get_dimensions("t10011")
+```
+
+```{r}
+dims |> dimension_describe()
+```
+
+### Hierarchies
+
+Some dimensions are grouped under a hierarchy. In the output above, dimensions marked with `[agare]` belong to the "Owner" hierarchy. This is metadata that helps you understand the logical structure — but when building a query, you use the child dimension names directly (e.g. `agarkat`, not `agare`).
+
+```{r}
+dims |>
+  dplyr::filter(!is.na(hierarchy))
+```
+
+### Dimension values and filter shortcuts
+
+Each dimension has a set of valid values. `dimension_values()` returns them as a tibble:
+
+```{r, echo = FALSE}
+ar_vals <- rTrafa:::vd_ar_values
+```
+
+```{r, eval = FALSE}
+ar_vals <- dimension_values(dims, "ar")
+```
+
+```{r}
+ar_vals
+```
+
+Note the `type` column. Entries with `type = "filter"` are **filter shortcuts** — dynamic values that the API resolves at query time:
+
+- `senaste` — the most recent available value
+- `forra` — the previous value
+
+These are useful for building queries that stay current without hardcoding years:
+
+```{r, eval = FALSE}
+# Always gets the latest year, regardless of when you run it
+get_data("t10011", "itrfslut", ar = "senaste")
+```
+
+Regular dimension values (`type = "value"`) can be inspected too:
+
+```{r, echo = FALSE}
+drivm_vals <- rTrafa:::vd_drivm_values
+```
+
+```{r, eval = FALSE}
+drivm_vals <- dimension_values(dims, "drivm")
+```
+
+```{r}
+drivm_vals
+```
+
+### Dimension validation
+
+When you know which measure you want, `get_dimensions()` can validate which dimensions are compatible:
+
+```{r, eval = FALSE}
+# Only dimensions valid for the "itrfslut" measure
+get_dimensions("t10011", measure = "itrfslut")
+
+# See all dimensions with their validity status
+get_dimensions("t10011", measure = "itrfslut", only_valid = FALSE)
+```
+
+## Fetching data
+
+`get_data()` is the core function. Provide a product, a measure, and optional dimension filters:
+
+```{r, echo = FALSE}
+bus_data <- rTrafa:::vd_data_bussar
+```
+
+```{r, eval = FALSE}
+bus_data <- get_data("t10011", "itrfslut",
+  ar = as.character(2016:2025)
+)
+```
+
+```{r}
+dplyr::glimpse(bus_data)
+```
+
+When `simplify = TRUE` (the default), each dimension gets both a code column and a `_label` column with the human-readable name.
+
+### Prepared queries
+
+For complex queries, `prepare_query()` validates your selections before hitting the data endpoint:
+
+```{r, eval = FALSE}
+q <- prepare_query("t10011", "itrfslut",
+  ar = c("2023", "2024"),
+  drivm = c("101", "102", "103")
+)
+q
+#> Trafa query: t10011 | itrfslut
+#>   Dimension filters:
+#>     ar = c("2023", "2024")
+#>     drivm = c("101", "102", "103")
+#>   Available (unfiltered) dimensions: ...
+
+# Pass the validated query to get_data()
+get_data(query = q)
+```
+
+### Data helpers
+
+`data_minimize()` removes columns where all values are identical — useful after filtering to a single year or fuel type:
+
+```{r, eval = FALSE}
+get_data("t10011", "itrfslut", ar = "2024") |>
+  data_minimize()
+```
+
+`data_legend()` generates a source caption for plots:
+
+```{r}
+data_legend(bus_data)
+```
+
+## Example: buses in traffic over time
+
+```{r, fig.width = 6, fig.height = 4}
+library("ggplot2")
+
+ggplot(bus_data, aes(x = as.integer(ar), y = itrfslut)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2) +
+  scale_y_continuous(labels = scales::comma) +
+  labs(
+    title = "Buses in traffic in Sweden",
+    x = "Year",
+    y = "Number of vehicles",
+    caption = data_legend(bus_data)
+  ) +
+  theme_minimal()
+```
+
+## Example: fuel type breakdown
+
+```{r, echo = FALSE}
+drivm_data <- rTrafa:::vd_data_drivm
+```
+
+```{r, eval = FALSE}
+drivm_data <- get_data("t10011", "itrfslut",
+  ar = "senaste",
+  drivm = c("101", "102", "103", "104", "105", "106", "107")
+)
+```
+
+```{r, fig.width = 7, fig.height = 4}
+ggplot(drivm_data, aes(
+  x = reorder(drivm_label, -itrfslut),
+  y = itrfslut
+)) +
+  geom_col(fill = "steelblue") +
+  scale_y_continuous(labels = scales::comma) +
+  labs(
+    title = "Buses in traffic by fuel type",
+    subtitle = paste("Year:", drivm_data$ar_label[1]),
+    x = NULL,
+    y = "Number of vehicles",
+    caption = data_legend(drivm_data)
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 35, hjust = 1))
+```
+
+## Example: comparing vehicle types
+
+By fetching the same measure from different products we can compare across vehicle types:
+
+```{r, echo = FALSE}
+pbilar_data <- rTrafa:::vd_data_personbilar
+```
+
+```{r, eval = FALSE}
+pbilar_data <- get_data("t10016", "itrfslut",
+  ar = as.character(2016:2025)
+)
+```
+
+```{r, fig.width = 7, fig.height = 4}
+comparison <- dplyr::bind_rows(
+  bus_data |> dplyr::mutate(vehicle = "Buses"),
+  pbilar_data |> dplyr::mutate(vehicle = "Passenger cars")
+)
+
+ggplot(comparison, aes(x = as.integer(ar), y = itrfslut, color = vehicle)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2) +
+  scale_y_continuous(labels = scales::comma) +
+  labs(
+    title = "Vehicles in traffic in Sweden",
+    x = "Year",
+    y = "Number of vehicles",
+    color = NULL
+  ) +
+  theme_minimal() +
+  theme(legend.position = "top")
+```
+
+## Related packages
+
+- [rKolada](https://lchansson.github.io/rKolada/) — municipal and
+  regional KPIs from Kolada
+- [pixieweb](https://lchansson.github.io/pixieweb/) — PX-Web APIs
+  (Statistics Sweden, Statistics Norway, etc.)
+
+All three packages follow the same design philosophy: tibble-based,
+pipe-friendly, and offline-safe.

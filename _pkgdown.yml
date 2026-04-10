@@ -1,0 +1,55 @@
+url: https://lchansson.github.io/rTrafa/
+template:
+  bootstrap: 5
+
+reference:
+  - title: Discover products
+    desc: Browse and search Trafa's statistical products.
+    contents:
+      - get_products
+      - product_search
+      - product_describe
+      - product_minimize
+      - product_extract_ids
+
+  - title: Explore measures
+    desc: Each product contains one or more measures (KPIs).
+    contents:
+      - get_measures
+      - measure_search
+      - measure_describe
+      - measure_extract_names
+
+  - title: Explore dimensions
+    desc: Dimensions are the filter variables available for a product.
+    contents:
+      - get_dimensions
+      - dimension_search
+      - dimension_describe
+      - dimension_values
+      - dimension_extract_names
+
+  - title: Prepare and fetch data
+    desc: Build queries and download data.
+    contents:
+      - prepare_query
+      - get_data
+
+  - title: Data utilities
+    desc: Post-processing helpers for downloaded data.
+    contents:
+      - data_minimize
+      - data_legend
+
+  - title: Query composition
+    desc: Low-level functions for building pipe-delimited API queries.
+    contents:
+      - compose_structure_query
+      - compose_data_query
+
+  - title: Utilities
+    desc: API availability and cache management.
+    contents:
+      - trafa_available
+      - trafa_cache_dir
+      - trafa_clear_cache

@@ -1,0 +1,35 @@
+Package: rTrafa
+Title: Access Swedish Transport Statistics from the 'Trafa' API
+Version: 0.1.0
+Authors@R:
+    person("Love", "Hansson", , email = "love.hansson@gmail.com",
+           role = c("aut", "cre", "cph"))
+Description: A pipe-friendly R client for the Trafa statistical API
+    (api.trafa.se). Provides a search-then-fetch workflow for discovering
+    and downloading Swedish transport and infrastructure data using a
+    consistent tibble-based interface.
+License: AGPL (>= 3)
+URL: https://lchansson.github.io/rTrafa/, https://github.com/lchansson/rTrafa
+BugReports: https://github.com/lchansson/rTrafa/issues
+Depends:
+    R (>= 4.1.0)
+Imports:
+    dplyr,
+    httr2,
+    jsonlite,
+    rlang (>= 1.1.0),
+    tibble
+Suggests:
+    cli,
+    ggplot2,
+    knitr,
+    rmarkdown,
+    scales,
+    testthat (>= 3.0.0),
+    tidyr,
+    withr
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3

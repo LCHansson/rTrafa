@@ -1,0 +1,152 @@
+---
+title: "A quick start guide to rTrafa"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{A quick start guide to rTrafa}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+This vignette provides a quick start guide to get up and running with rTrafa as fast as possible. For a more comprehensive introduction, see [Introduction to rTrafa](introduction-to-rtrafa.html).
+
+```{r setup}
+library("rTrafa")
+```
+
+In this guide we walk you through five steps to discover products, explore their structure, download data and visualise it.
+
+Trafa's data is organised in three layers: **Product** (a statistical domain, e.g. "Buses"), **Measure** (what is measured, e.g. "Vehicles in traffic"), and **Dimension** (how to filter, e.g. year, fuel type). To download data you specify a product, a measure, and optionally dimension filters.
+
+### 1. Get products
+
+Trafa publishes dozens of statistical products. Start by listing them:
+
+```{r, echo = FALSE}
+products <- rTrafa:::vd_products
+```
+
+```{r, eval = FALSE}
+products <- get_products()
+```
+
+```{r}
+dplyr::glimpse(products)
+```
+
+Use `product_search()` to filter by text:
+
+```{r}
+products |>
+  product_search("Bussar") |>
+  product_describe(max_n = 3)
+```
+
+### 2. Explore measures
+
+Each product has several measures (KPIs). Let's see what's available for Buses (t10011):
+
+```{r, echo = FALSE}
+measures <- rTrafa:::vd_measures_bussar
+```
+
+```{r, eval = FALSE}
+measures <- get_measures("t10011")
+```
+
+```{r}
+measures |> measure_describe()
+```
+
+### 3. Explore dimensions
+
+Dimensions are the variables you can filter on. Use `get_dimensions()` to discover them:
+
+```{r, echo = FALSE}
+dims <- rTrafa:::vd_dims_bussar
+```
+
+```{r, eval = FALSE}
+dims <- get_dimensions("t10011")
+```
+
+```{r}
+dims |> dimension_describe()
+```
+
+Notice that some dimensions belong to a **hierarchy** (shown in brackets). These are grouped conceptually but each is queried independently.
+
+You can inspect the available values for any dimension:
+
+```{r, echo = FALSE}
+ar_vals <- rTrafa:::vd_ar_values
+```
+
+```{r, eval = FALSE}
+ar_vals <- dimension_values(dims, "ar")
+```
+
+```{r}
+ar_vals
+```
+
+Note the `type` column: `"filter"` entries like `senaste` (latest) and `forra` (previous) are shortcuts that the API resolves dynamically.
+
+### 4. Get data
+
+Now let's fetch data. We request the number of buses in traffic for the last 10 years:
+
+```{r, echo = FALSE}
+bus_data <- rTrafa:::vd_data_bussar
+```
+
+```{r, eval = FALSE}
+bus_data <- get_data("t10011", "itrfslut",
+  ar = as.character(2016:2025)
+)
+```
+
+```{r}
+dplyr::glimpse(bus_data)
+```
+
+### 5. Visualise
+
+```{r, fig.width = 6, fig.height = 4}
+library("ggplot2")
+
+ggplot(bus_data, aes(x = as.integer(ar), y = itrfslut)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2) +
+  scale_y_continuous(labels = scales::comma) +
+  labs(
+    title = "Buses in traffic in Sweden",
+    x = "Year",
+    y = "Number of vehicles",
+    caption = data_legend(bus_data)
+  ) +
+  theme_minimal()
+```
+
+## Next steps
+
+- **Deeper walkthrough** — `vignette("introduction-to-rtrafa")` covers
+  the full data model, hierarchies, filter shortcuts, and dimension
+  validation.
+- **Filter shortcuts** — Use `ar = "senaste"` to always get the latest
+  year without hardcoding.
+
+## Related packages
+
+If you work with other Swedish statistical APIs, see:
+
+- [rKolada](https://lchansson.github.io/rKolada/) — municipal and
+  regional KPIs from Kolada
+- [pixieweb](https://lchansson.github.io/pixieweb/) — PX-Web APIs
+  (Statistics Sweden, etc.)
