@@ -11,6 +11,7 @@ reference:
       - product_describe
       - product_minimize
       - product_extract_ids
+      - product_has_data
 
   - title: Explore measures
     desc: Each product contains one or more measures (KPIs).
