@@ -11,6 +11,8 @@ get_data(
   query = NULL,
   lang = NULL,
   simplify = TRUE,
+  cache = FALSE,
+  cache_location = NULL,
   verbose = FALSE
 )
 }
@@ -32,6 +34,14 @@ Ignored when \code{query} is provided.}
 \item{lang}{Language code: \code{"SV"} or \code{"EN"}.}
 
 \item{simplify}{Add human-readable label columns alongside codes.}
+
+\item{cache}{Logical. If \code{TRUE} and \code{cache_location} points at a SQLite
+file (or an \code{nxt_handle} from nordstatExtras), the data is cached at
+cell granularity in that database. Supports concurrent multi-process
+read/write and cross-query cell reuse. Requires \code{nordstatExtras}.}
+
+\item{cache_location}{Either a path to a \code{.sqlite} file or an \code{nxt_handle}
+returned by \code{nordstatExtras::nxt_open()}. Ignored unless \code{cache = TRUE}.}
 
 \item{verbose}{Print request details.}
 }

@@ -24,7 +24,8 @@ get_measures(
 \item{verbose}{Print request details.}
 }
 \value{
-A tibble with columns: \code{product}, \code{name}, \code{label}, \code{description}.
+A tibble with columns: \code{product}, \code{name}, \code{label}, \code{description},
+\code{id}, \code{unique_id}, \code{option}, \code{active_from}, \code{data_type}, \code{parent_name}.
 }
 \description{
 Retrieves the available measures for a Trafa product. Each measure
