@@ -16,6 +16,12 @@
 #'   `product`, `measure`, and `...` are taken from the query object.
 #' @param lang Language code: `"SV"` or `"EN"`.
 #' @param simplify Add human-readable label columns alongside codes.
+#' @param cache Logical. If `TRUE` and `cache_location` points at a SQLite
+#'   file (or an `nxt_handle` from nordstatExtras), the data is cached at
+#'   cell granularity in that database. Supports concurrent multi-process
+#'   read/write and cross-query cell reuse. Requires `nordstatExtras`.
+#' @param cache_location Either a path to a `.sqlite` file or an `nxt_handle`
+#'   returned by `nordstatExtras::nxt_open()`. Ignored unless `cache = TRUE`.
 #' @param verbose Print request details.
 #' @return A tibble of data. Dimension columns use the dimension name;
 #'   when `simplify = TRUE`, additional `{name}_label` columns are added.
@@ -42,6 +48,8 @@ get_data <- function(product,
                      query = NULL,
                      lang = NULL,
                      simplify = TRUE,
+                     cache = FALSE,
+                     cache_location = NULL,
                      verbose = FALSE) {
   if (inherits(query, "trafa_query")) {
     product <- query$product
@@ -65,6 +73,28 @@ get_data <- function(product,
 
   lang <- resolve_lang(lang)
 
+  # SQLite-backed cell cache via nordstatExtras. Keyed by product + measure
+  # + filters + lang + simplify. Normalize needs product + measures so it
+  # can split the tibble into per-measure cells.
+  nxt_ch <- NULL
+  if (isTRUE(cache) && !is.null(cache_location) &&
+      requireNamespace("nordstatExtras", quietly = TRUE) &&
+      nordstatExtras::nxt_is_backend(cache_location)) {
+    nxt_ch <- nordstatExtras::nxt_cache_handler(
+      source         = "trafa",
+      entity         = "data",
+      cache          = TRUE,
+      cache_location = cache_location,
+      key_params     = c(
+        list(product = product, measure = measure,
+             lang = lang, simplify = simplify),
+        filters
+      ),
+      normalize_extra = list(product = product, measures = measure, lang = lang)
+    )
+    if (nxt_ch("discover")) return(nxt_ch("load"))
+  }
+
   query_str <- do.call(compose_data_query,
     c(list(product = product, measure = measure), filters)
   )
@@ -83,6 +113,10 @@ get_data <- function(product,
     lang = lang,
     fetched = Sys.time()
   )
+
+  if (!is.null(nxt_ch) && nrow(result) > 0) {
+    nxt_ch("store", result)
+  }
 
   result
 }
@@ -108,11 +142,13 @@ parse_trafa_data <- function(raw, simplify = TRUE) {
     return(NULL)
   }
 
-  # Parse column metadata
+  # Parse column metadata — extract all fields the API provides
   col_names <- vapply(columns, function(c) c$Name %||% NA_character_, character(1))
   col_labels <- vapply(columns, function(c) c$Value %||% c$Label %||% NA_character_, character(1))
   col_types <- vapply(columns, function(c) c$Type %||% NA_character_, character(1))
   col_units <- vapply(columns, function(c) c$Unit %||% NA_character_, character(1))
+  col_descriptions <- vapply(columns, function(c) c$Description %||% NA_character_, character(1))
+  col_unique_ids <- vapply(columns, function(c) c$UniqueId %||% NA_character_, character(1))
 
   # Build column type lookup: name -> "D" or "M"
   col_type_lookup <- stats::setNames(col_types, col_names)
@@ -169,7 +205,21 @@ parse_trafa_data <- function(raw, simplify = TRUE) {
 
   if (is.null(result)) return(NULL)
 
-  tibble::as_tibble(result)
+  result <- tibble::as_tibble(result)
+
+  # Attach column metadata as an attribute. This is backwards-compatible
+  # (the tibble itself doesn't gain extra columns), but downstream functions
+  # like data_legend() can use unit and description for richer labeling.
+  attr(result, "trafa_columns") <- tibble::tibble(
+    name        = col_names,
+    type        = col_types,
+    label       = col_labels,
+    unit        = col_units,
+    description = col_descriptions,
+    unique_id   = col_unique_ids
+  )
+
+  result
 }
 
 #' Remove monotonous columns from a data tibble

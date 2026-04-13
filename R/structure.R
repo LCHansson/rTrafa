@@ -21,12 +21,30 @@ get_structure_raw <- function(product,
   lang <- resolve_lang(lang)
 
   extra <- as.character(c(...))
-  ch <- cache_handler("structure", cache, cache_location, key_params = list(
+  key <- list(
     product = product,
     extra = paste(extra, collapse = "|"),
     lang = lang
-  ))
-  if (ch("discover")) return(ch("load"))
+  )
+
+  # SQLite-backed metadata cache via nordstatExtras. The payload here is a
+  # *list* of StructureItems (not a tibble) — base::serialize handles it.
+  nxt_ch <- NULL
+  ch <- NULL
+  if (isTRUE(cache) && !is.null(cache_location) &&
+      requireNamespace("nordstatExtras", quietly = TRUE) &&
+      nordstatExtras::nxt_is_backend(cache_location)) {
+    nxt_ch <- nordstatExtras::nxt_cache_handler(
+      source = "trafa", entity = "structure", cache = TRUE,
+      cache_location = cache_location,
+      kind = "metadata",
+      key_params = key
+    )
+    if (nxt_ch("discover")) return(nxt_ch("load"))
+  } else {
+    ch <- cache_handler("structure", cache, cache_location, key_params = key)
+    if (ch("discover")) return(ch("load"))
+  }
 
   query_str <- compose_structure_query(product, ...)
   url <- trafa_url("structure", query = query_str, lang = lang)
@@ -40,6 +58,10 @@ get_structure_raw <- function(product,
     return(NULL)
   }
 
+  if (!is.null(nxt_ch)) {
+    nxt_ch("store", items)
+    return(items)
+  }
   ch("store", items)
 }
 
@@ -55,8 +77,9 @@ get_structure_raw <- function(product,
 classify_structure_items <- function(items) {
   types <- vapply(items, function(x) x$Type %||% "", character(1))
   list(
-    dimensions = items[types == "D"],
-    measures   = items[types == "M"],
+    products    = items[types == "P"],
+    dimensions  = items[types == "D"],
+    measures    = items[types == "M"],
     hierarchies = items[types == "H"]
   )
 }
