@@ -35,8 +35,9 @@ A filtered tibble.
 if (trafa_available()) {
   get_measures("t10011") |> measure_search("trafik")
 }# }
-#> # A tibble: 1 × 4
-#>   product name     label          description               
-#>   <chr>   <chr>    <chr>          <chr>                     
-#> 1 t10011  itrfslut Antal i trafik Avser i slutet av perioden
+#> # A tibble: 1 × 10
+#>   product name    label description    id unique_id option active_from data_type
+#>   <chr>   <chr>   <chr> <chr>       <int> <chr>     <lgl>  <chr>       <chr>    
+#> 1 t10011  itrfsl… Anta… Avser i sl…  4183 Ditrfslut TRUE   0001-01-01… String   
+#> # ℹ 1 more variable: parent_name <chr>
 ```

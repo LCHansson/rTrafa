@@ -39,6 +39,7 @@
     <li><a class="dropdown-item" href="articles/introduction-to-rtrafa.html">Introduction to rTrafa</a></li>
   </ul>
 </li>
+<li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -113,6 +114,27 @@
 <li>
 <strong>Offline-safe examples</strong>: <code><a href="reference/trafa_available.html">trafa_available()</a></code> guards all network calls so examples and tests degrade gracefully when the API is down</li>
 </ul>
+</div>
+<div class="section level2">
+<h2 id="enhanced-caching-with-nordstatextras">Enhanced caching with nordstatExtras<a class="anchor" aria-label="anchor" href="#enhanced-caching-with-nordstatextras"></a>
+</h2>
+<p>For multi-user web applications or workflows that benefit from a shared, persistent cache, rTrafa integrates with the <a href="https://github.com/LCHansson/nordstatExtras" class="external-link">nordstatExtras</a> package. When installed, <code><a href="reference/get_data.html">get_data()</a></code>, <code><a href="reference/get_products.html">get_products()</a></code>, and other functions can write to a shared SQLite file instead of per-session <code>.rds</code> files:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"LCHansson/nordstatExtras"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/LCHansson/nordstatExtras" class="external-link">nordstatExtras</a></span><span class="op">)</span></span>
+<span><span class="va">handle</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/nordstatExtras/man/nxt_open.html" class="external-link">nxt_open</a></span><span class="op">(</span><span class="st">"cache.sqlite"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Data and metadata are cached in the same SQLite file</span></span>
+<span><span class="va">products</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_products.html">get_products</a></span><span class="op">(</span>cache <span class="op">=</span> <span class="cn">TRUE</span>, cache_location <span class="op">=</span> <span class="va">handle</span><span class="op">)</span></span>
+<span><span class="va">bus_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_data.html">get_data</a></span><span class="op">(</span><span class="st">"t10011"</span>, <span class="st">"itrfslut"</span>,</span>
+<span>  ar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="fl">2020</span><span class="op">:</span><span class="fl">2025</span><span class="op">)</span>,</span>
+<span>  cache <span class="op">=</span> <span class="cn">TRUE</span>, cache_location <span class="op">=</span> <span class="va">handle</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/nordstatExtras/man/nxt_close.html" class="external-link">nxt_close</a></span><span class="op">(</span><span class="va">handle</span><span class="op">)</span></span></code></pre></div>
+<p>Features include cell-level deduplication across overlapping queries, cross-query freshness propagation, and FTS5-powered typeahead search via <code><a href="https://rdrr.io/pkg/nordstatExtras/man/nxt_search.html" class="external-link">nxt_search()</a></code>. See the <a href="https://github.com/LCHansson/nordstatExtras" class="external-link">nordstatExtras README</a> for details.</p>
 </div>
 <div class="section level2">
 <h2 id="contributing">Contributing<a class="anchor" aria-label="anchor" href="#contributing"></a>

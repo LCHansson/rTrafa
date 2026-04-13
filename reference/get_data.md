@@ -15,6 +15,8 @@ get_data(
   query = NULL,
   lang = NULL,
   simplify = TRUE,
+  cache = FALSE,
+  cache_location = NULL,
   verbose = FALSE
 )
 ```
@@ -51,6 +53,19 @@ get_data(
 - simplify:
 
   Add human-readable label columns alongside codes.
+
+- cache:
+
+  Logical. If `TRUE` and `cache_location` points at a SQLite file (or an
+  `nxt_handle` from nordstatExtras), the data is cached at cell
+  granularity in that database. Supports concurrent multi-process
+  read/write and cross-query cell reuse. Requires `nordstatExtras`.
+
+- cache_location:
+
+  Either a path to a `.sqlite` file or an `nxt_handle` returned by
+  [`nordstatExtras::nxt_open()`](https://rdrr.io/pkg/nordstatExtras/man/nxt_open.html).
+  Ignored unless `cache = TRUE`.
 
 - verbose:
 

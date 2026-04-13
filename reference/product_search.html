@@ -21,6 +21,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/a-quickstart-rtrafa.html">A quick start guide to rTrafa</a></li>
     <li><a class="dropdown-item" href="../articles/introduction-to-rtrafa.html">Introduction to rTrafa</a></li>
   </ul></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/lchansson/rTrafa/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
@@ -73,16 +74,16 @@
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="trafa_available.html">trafa_available</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="get_products.html">get_products</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">product_search</span><span class="op">(</span><span class="st">"fordon"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span><span class="co"># }</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 7 × 5</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   name   label              description                           id active_from</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                              <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> t10091 Bussar             <span style="color: #949494;">"</span>Bussar\n\nDefinitioner-&gt; Busskla…   231 2019-04-29…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> t10092 Lastbilar          <span style="color: #949494;">"</span>Lastbilar\nDefinitioner-&gt;Karosse…   232 2019-04-29…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> t10094 Personbilar        <span style="color: #949494;">"</span>Personbilar\n\nDefinitioner-&gt;Ens…   234 2019-04-29…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> t06012 Fordon             <span style="color: #949494;">""</span>                                   258 2019-08-23…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> t10029 Övriga fordonsslag <span style="color: #949494;">""</span>                                   273 2020-05-08…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> t10039 Övriga fordonsslag <span style="color: #949494;">""</span>                                   276 2020-05-08…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">7</span> t10010 Fordon på väg      <span style="color: #949494;">""</span>                                   313 2025-12-15…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 7 × 8</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   name   label        description    id unique_id option parent_name active_from</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> t10091 Bussar       <span style="color: #949494;">"</span>Bussar\n\…   231 T10091    TRUE   <span style="color: #BB0000;">NA</span>          2019-04-29…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> t10092 Lastbilar    <span style="color: #949494;">"</span>Lastbilar…   232 T10092    TRUE   <span style="color: #BB0000;">NA</span>          2019-04-29…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> t10094 Personbilar  <span style="color: #949494;">"</span>Personbil…   234 T10094    TRUE   <span style="color: #BB0000;">NA</span>          2019-04-29…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> t06012 Fordon       <span style="color: #949494;">""</span>            258 T06012    TRUE   <span style="color: #BB0000;">NA</span>          2019-08-23…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> t10029 Övriga ford… <span style="color: #949494;">""</span>            273 T10029    TRUE   <span style="color: #BB0000;">NA</span>          2020-05-08…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> t10039 Övriga ford… <span style="color: #949494;">""</span>            276 T10039    TRUE   <span style="color: #BB0000;">NA</span>          2020-05-08…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">7</span> t10010 Fordon på v… <span style="color: #949494;">""</span>            313 T10010    TRUE   <span style="color: #BB0000;">NA</span>          2025-12-15…</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

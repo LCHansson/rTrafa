@@ -83,6 +83,40 @@ bus_data <- get_data("t10011", "itrfslut",
   guards all network calls so examples and tests degrade gracefully when
   the API is down
 
+## Enhanced caching with nordstatExtras
+
+For multi-user web applications or workflows that benefit from a shared,
+persistent cache, rTrafa integrates with the
+[nordstatExtras](https://github.com/LCHansson/nordstatExtras) package.
+When installed,
+[`get_data()`](https://lchansson.github.io/rTrafa/reference/get_data.md),
+[`get_products()`](https://lchansson.github.io/rTrafa/reference/get_products.md),
+and other functions can write to a shared SQLite file instead of
+per-session `.rds` files:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("LCHansson/nordstatExtras")
+
+library(nordstatExtras)
+handle <- nxt_open("cache.sqlite")
+
+# Data and metadata are cached in the same SQLite file
+products <- get_products(cache = TRUE, cache_location = handle)
+bus_data <- get_data("t10011", "itrfslut",
+  ar = as.character(2020:2025),
+  cache = TRUE, cache_location = handle
+)
+
+nxt_close(handle)
+```
+
+Features include cell-level deduplication across overlapping queries,
+cross-query freshness propagation, and FTS5-powered typeahead search via
+[`nxt_search()`](https://rdrr.io/pkg/nordstatExtras/man/nxt_search.html).
+See the [nordstatExtras
+README](https://github.com/LCHansson/nordstatExtras) for details.
+
 ## Contributing
 
 You are welcome to contribute to the further development of the rTrafa
@@ -128,6 +162,8 @@ Browse and search Trafa’s statistical products.
   : Remove monotonous columns from a product tibble
 - [`product_extract_ids()`](https://lchansson.github.io/rTrafa/reference/product_extract_ids.md)
   : Extract product codes from a product tibble
+- [`product_has_data()`](https://lchansson.github.io/rTrafa/reference/product_has_data.md)
+  : Check if a product is a data-bearing leaf or an empty container
 
 ## Explore measures
 

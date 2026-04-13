@@ -14,6 +14,8 @@ Browse and search Trafa’s statistical products.
   : Remove monotonous columns from a product tibble
 - [`product_extract_ids()`](https://lchansson.github.io/rTrafa/reference/product_extract_ids.md)
   : Extract product codes from a product tibble
+- [`product_has_data()`](https://lchansson.github.io/rTrafa/reference/product_has_data.md)
+  : Check if a product is a data-bearing leaf or an empty container
 
 ## Explore measures
 

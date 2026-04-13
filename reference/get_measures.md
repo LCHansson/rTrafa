@@ -44,7 +44,8 @@ get_measures(
 
 ## Value
 
-A tibble with columns: `product`, `name`, `label`, `description`.
+A tibble with columns: `product`, `name`, `label`, `description`, `id`,
+`unique_id`, `option`, `active_from`, `data_type`, `parent_name`.
 
 ## Examples
 
