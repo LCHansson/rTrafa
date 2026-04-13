@@ -60,13 +60,13 @@ bus_data <- get_data("t10011", "itrfslut",
 
 For multi-user web applications or workflows that benefit from a shared,
 persistent cache, rTrafa integrates with the
-[nordstatExtras](https://github.com/LoveHansson/nordstatExtras) package.
+[nordstatExtras](https://github.com/LCHansson/nordstatExtras) package.
 When installed, `get_data()`, `get_products()`, and other functions can
 write to a shared SQLite file instead of per-session `.rds` files:
 
 ```r
 # install.packages("devtools")
-devtools::install_github("LoveHansson/nordstatExtras")
+devtools::install_github("LCHansson/nordstatExtras")
 
 library(nordstatExtras)
 handle <- nxt_open("cache.sqlite")
@@ -84,7 +84,7 @@ nxt_close(handle)
 Features include cell-level deduplication across overlapping queries,
 cross-query freshness propagation, and FTS5-powered typeahead search
 via `nxt_search()`. See the
-[nordstatExtras README](https://github.com/LoveHansson/nordstatExtras)
+[nordstatExtras README](https://github.com/LCHansson/nordstatExtras)
 for details.
 
 ## Contributing
