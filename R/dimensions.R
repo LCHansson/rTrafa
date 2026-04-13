@@ -124,7 +124,11 @@ build_dimension_row <- function(item, product, hierarchy) {
     description = item$Description %||% NA_character_,
     hierarchy   = hierarchy,
     n_values    = as.integer(n_values),
-    values      = list(vals)
+    values      = list(vals),
+    id          = as.integer(item$Id %||% NA_integer_),
+    unique_id   = item$UniqueId %||% NA_character_,
+    parent_name = item$ParentName %||% NA_character_,
+    active_from = item$ActiveFrom %||% NA_character_
   )
 }
 

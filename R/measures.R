@@ -11,7 +11,8 @@
 #' @param cache Logical, cache results locally.
 #' @param cache_location Cache directory. Defaults to [trafa_cache_dir()].
 #' @param verbose Print request details.
-#' @return A tibble with columns: `product`, `name`, `label`, `description`.
+#' @return A tibble with columns: `product`, `name`, `label`, `description`,
+#'   `id`, `unique_id`, `option`, `active_from`, `data_type`, `parent_name`.
 #' @export
 #' @examples
 #' \donttest{
@@ -39,7 +40,13 @@ get_measures <- function(product,
     product     = product,
     name        = vapply(m_items, function(x) x$Name %||% NA_character_, character(1)),
     label       = vapply(m_items, function(x) x$Label %||% NA_character_, character(1)),
-    description = vapply(m_items, function(x) x$Description %||% NA_character_, character(1))
+    description = vapply(m_items, function(x) x$Description %||% NA_character_, character(1)),
+    id          = vapply(m_items, function(x) as.integer(x$Id %||% NA_integer_), integer(1)),
+    unique_id   = vapply(m_items, function(x) x$UniqueId %||% NA_character_, character(1)),
+    option      = vapply(m_items, function(x) x$Option %||% NA, logical(1)),
+    active_from = vapply(m_items, function(x) x$ActiveFrom %||% NA_character_, character(1)),
+    data_type   = vapply(m_items, function(x) x$DataType %||% NA_character_, character(1)),
+    parent_name = vapply(m_items, function(x) x$ParentName %||% NA_character_, character(1))
   )
 }
 
@@ -47,7 +54,10 @@ get_measures <- function(product,
 empty_measures_tibble <- function() {
   tibble::tibble(
     product = character(), name = character(),
-    label = character(), description = character()
+    label = character(), description = character(),
+    id = integer(), unique_id = character(),
+    option = logical(), active_from = character(),
+    data_type = character(), parent_name = character()
   )
 }
 
