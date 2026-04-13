@@ -12,3 +12,4 @@
 ^README\.Rmd$
 ^docs_noinstall$
 ^data-raw$
+^tmp$

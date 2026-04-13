@@ -23,6 +23,7 @@ Suggests:
     cli,
     ggplot2,
     knitr,
+    nordstatExtras,
     rmarkdown,
     scales,
     testthat (>= 3.0.0),
