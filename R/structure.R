@@ -87,7 +87,10 @@ classify_structure_items <- function(items) {
 #' Parse dimension values (DV) and filter shortcuts (F) from a dimension item
 #'
 #' @param item A single StructureItem of type D.
-#' @return A tibble with columns `name`, `label`, `type` ("value" or "filter").
+#' @return A tibble with columns `code`, `text`, `name`, `label`, `type`
+#'   ("value" or "filter"). `code`/`text` mirror the names used by
+#'   `pixieweb::get_variables()` and `rKolada` for consistency across the
+#'   nordstat family; `name`/`label` are retained as aliases.
 #' @noRd
 parse_dimension_values <- function(item) {
   children <- item$StructureItems %||% list()
@@ -96,11 +99,17 @@ parse_dimension_values <- function(item) {
 
   if (length(relevant) == 0) return(NULL)
 
+  codes  <- vapply(relevant, function(x) x$Name %||% NA_character_, character(1))
+  texts  <- vapply(relevant, function(x) x$Label %||% NA_character_, character(1))
+  types  <- vapply(relevant, function(x) {
+    if (identical(x$Type, "F")) "filter" else "value"
+  }, character(1))
+
   tibble::tibble(
-    name  = vapply(relevant, function(x) x$Name %||% NA_character_, character(1)),
-    label = vapply(relevant, function(x) x$Label %||% NA_character_, character(1)),
-    type  = vapply(relevant, function(x) {
-      if (identical(x$Type, "F")) "filter" else "value"
-    }, character(1))
+    code  = codes,
+    text  = texts,
+    name  = codes,   # backwards-compatible alias — will be deprecated in 0.2.0
+    label = texts,   # backwards-compatible alias — will be deprecated in 0.2.0
+    type  = types
   )
 }

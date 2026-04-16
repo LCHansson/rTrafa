@@ -109,7 +109,19 @@ test_that("get_data returns NULL on API failure", {
     trafa_get = function(...) NULL
   )
 
-  expect_null(get_data("t10011", "itrfslut"))
+  # get_data with no dimension filters now emits a helpful warning up-front;
+  # the underlying API-failure path must still return NULL.
+  expect_null(suppressWarnings(get_data("t10011", "itrfslut")))
+})
+
+test_that("get_data warns when called with no dimension filters", {
+  # Stub the HTTP layer so the warning test doesn't fall through to the
+  # "No data rows" warning emitted by parse_trafa_data.
+  local_mocked_bindings(trafa_get = function(...) NULL)
+  expect_warning(
+    get_data("t10011", "itrfslut", query = NULL),
+    "No dimension filters"
+  )
 })
 
 test_that("trafa_available returns TRUE for successful response", {

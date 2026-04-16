@@ -24,6 +24,23 @@ get_measures <- function(product,
                          cache = FALSE,
                          cache_location = trafa_cache_dir,
                          verbose = FALSE) {
+  # Measures-specific nordstatExtras cache. Without this, the search index
+  # extractor (trafa/measures in nordstatExtras::search.R) never fires,
+  # because get_structure_raw stores under entity="structure" which is
+  # deliberately omitted from the search index.
+  nxt_ch <- NULL
+  if (isTRUE(cache) && !is.null(cache_location) &&
+      requireNamespace("nordstatExtras", quietly = TRUE) &&
+      nordstatExtras::nxt_is_backend(cache_location)) {
+    nxt_ch <- nordstatExtras::nxt_cache_handler(
+      source = "trafa", entity = "measures", cache = TRUE,
+      cache_location = cache_location,
+      kind = "metadata",
+      key_params = list(product = product, lang = lang)
+    )
+    if (nxt_ch("discover")) return(nxt_ch("load"))
+  }
+
   items <- get_structure_raw(product, lang = lang, cache = cache,
                              cache_location = cache_location, verbose = verbose)
   if (is.null(items)) return(NULL)
@@ -33,10 +50,12 @@ get_measures <- function(product,
 
   if (length(m_items) == 0) {
     warn(paste0("No measures found for product '", product, "'."))
-    return(empty_measures_tibble())
+    result <- empty_measures_tibble()
+    if (!is.null(nxt_ch)) nxt_ch("store", result)
+    return(result)
   }
 
-  tibble::tibble(
+  result <- tibble::tibble(
     product     = product,
     name        = vapply(m_items, function(x) x$Name %||% NA_character_, character(1)),
     label       = vapply(m_items, function(x) x$Label %||% NA_character_, character(1)),
@@ -48,6 +67,9 @@ get_measures <- function(product,
     data_type   = vapply(m_items, function(x) x$DataType %||% NA_character_, character(1)),
     parent_name = vapply(m_items, function(x) x$ParentName %||% NA_character_, character(1))
   )
+
+  if (!is.null(nxt_ch)) nxt_ch("store", result)
+  result
 }
 
 #' @noRd

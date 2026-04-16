@@ -1,6 +1,6 @@
 Package: rTrafa
 Title: Access Swedish Transport Statistics from the 'Trafa' API
-Version: 0.1.0
+Version: 0.1.0.9002
 Authors@R:
     person("Love", "Hansson", , email = "love.hansson@gmail.com",
            role = c("aut", "cre", "cph"))

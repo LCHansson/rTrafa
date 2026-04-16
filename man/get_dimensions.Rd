@@ -39,9 +39,13 @@ status.}
 A tibble with columns: \code{product}, \code{name}, \code{label}, \code{data_type},
 \code{option}, \code{description}, \code{hierarchy}, \code{n_values}, \code{values}.
 
-The \code{values} column contains nested tibbles with columns \code{name},
-\code{label}, and \code{type} (\code{"value"} for regular dimension values,
-\code{"filter"} for API filter shortcuts like \code{"senaste"} / latest).
+The \code{values} column contains nested tibbles with columns \code{code},
+\code{text}, \code{name}, \code{label} and \code{type}. \code{code}/\code{text} mirror the
+conventions used by \code{pixieweb::get_variables()} and the sibling
+Kolada package; \code{name}/\code{label} are legacy aliases kept for
+backward compatibility. \code{type} is \code{"value"} for regular dimension
+values and \code{"filter"} for API filter shortcuts like \code{"senaste"}
+(latest).
 }
 \description{
 Retrieves the available dimensions for a Trafa product. Dimensions are

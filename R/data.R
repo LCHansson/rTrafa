@@ -71,6 +71,19 @@ get_data <- function(product,
     filters <- list(...)
   }
 
+  # The Trafa API typically requires at least one dimension filter (almost
+  # always a time dimension such as `ar`) to return data. Calling get_data
+  # with no filters silently returns an empty tibble via "No data rows in
+  # Trafa API response." — confusing and hard to diagnose. Warn up front.
+  if (length(filters) == 0) {
+    warn(c(
+      "No dimension filters were supplied to `get_data()`.",
+      i = paste0("The Trafa API usually returns an empty response in this case. ",
+                 "Supply at least one filter, typically a year (`ar = \"2024\"`). ",
+                 "Use `get_dimensions(product)` to discover available dimensions.")
+    ))
+  }
+
   lang <- resolve_lang(lang)
 
   # SQLite-backed cell cache via nordstatExtras. Keyed by product + measure

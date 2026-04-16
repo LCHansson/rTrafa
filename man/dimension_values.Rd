@@ -12,7 +12,9 @@ dimension_values(dim_df, dimension_name)
 \item{dimension_name}{Dimension name (character).}
 }
 \value{
-A tibble with columns \code{name}, \code{label}, \code{type}.
+A tibble with columns \code{code}, \code{text}, \code{name}, \code{label}, \code{type}.
+\code{code}/\code{text} mirror the nordstat-family convention; \code{name}/\code{label}
+are retained as legacy aliases.
 }
 \description{
 Returns the available values for a dimension, including both regular

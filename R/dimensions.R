@@ -35,9 +35,13 @@
 #' @return A tibble with columns: `product`, `name`, `label`, `data_type`,
 #'   `option`, `description`, `hierarchy`, `n_values`, `values`.
 #'
-#'   The `values` column contains nested tibbles with columns `name`,
-#'   `label`, and `type` (`"value"` for regular dimension values,
-#'   `"filter"` for API filter shortcuts like `"senaste"` / latest).
+#'   The `values` column contains nested tibbles with columns `code`,
+#'   `text`, `name`, `label` and `type`. `code`/`text` mirror the
+#'   conventions used by `pixieweb::get_variables()` and the sibling
+#'   Kolada package; `name`/`label` are legacy aliases kept for
+#'   backward compatibility. `type` is `"value"` for regular dimension
+#'   values and `"filter"` for API filter shortcuts like `"senaste"`
+#'   (latest).
 #' @export
 #' @examples
 #' \donttest{
@@ -238,7 +242,9 @@ dimension_describe <- function(dim_df, max_n = 15, format = "inline",
 #'
 #' @param dim_df A tibble returned by [get_dimensions()].
 #' @param dimension_name Dimension name (character).
-#' @return A tibble with columns `name`, `label`, `type`.
+#' @return A tibble with columns `code`, `text`, `name`, `label`, `type`.
+#'   `code`/`text` mirror the nordstat-family convention; `name`/`label`
+#'   are retained as legacy aliases.
 #' @export
 #' @examples
 #' \donttest{
@@ -251,12 +257,14 @@ dimension_values <- function(dim_df, dimension_name) {
   row <- dim_df[dim_df$name == dimension_name, ]
   if (nrow(row) == 0) {
     warn(paste0("Dimension '", dimension_name, "' not found."))
-    return(tibble::tibble(name = character(), label = character(),
+    return(tibble::tibble(code = character(), text = character(),
+                          name = character(), label = character(),
                           type = character()))
   }
   vals <- row$values[[1]]
   if (is.null(vals)) {
-    return(tibble::tibble(name = character(), label = character(),
+    return(tibble::tibble(code = character(), text = character(),
+                          name = character(), label = character(),
                           type = character()))
   }
   vals
