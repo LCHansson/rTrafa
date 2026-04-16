@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">rTrafa</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9002</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,6 +37,26 @@
       <small>Source: <a href="https://github.com/lchansson/rTrafa/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.0.9001" id="rtrafa-0109001-development">rTrafa 0.1.0.9001 (development)<a class="anchor" aria-label="anchor" href="#rtrafa-0109001-development"></a></h2>
+<div class="section level3">
+<h3 id="minor-changes-0-1-0-9001">Minor changes<a class="anchor" aria-label="anchor" href="#minor-changes-0-1-0-9001"></a></h3>
+<ul><li>The nested <code>values</code> tibble inside <code><a href="../reference/get_dimensions.html">get_dimensions()</a></code> now exposes <code>code</code> and <code>text</code> columns in addition to the legacy <code>name</code> and <code>label</code> columns. <code>code</code>/<code>text</code> mirror the convention used by <code>pixieweb::get_variables()</code> and the sibling Kolada package, making it easier to write code that works against all three sources. The legacy aliases remain for backward compatibility and will be deprecated in a later release.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-0-1-0-9001">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-1-0-9001"></a></h3>
+<ul><li>
+<code><a href="../reference/get_data.html">get_data()</a></code> now warns when called with no dimension filters. The Trafa API returns an empty response in this case, which previously surfaced only as a cryptic “No data rows in Trafa API response.” warning. The new message points the user to <code><a href="../reference/get_dimensions.html">get_dimensions()</a></code> and suggests starting with an <code>ar = "..."</code> filter.</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.0.9000" id="rtrafa-0109000-development">rTrafa 0.1.0.9000 (development)<a class="anchor" aria-label="anchor" href="#rtrafa-0109000-development"></a></h2>
+<div class="section level3">
+<h3 id="bug-fixes-0-1-0-9000">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-1-0-9000"></a></h3>
+<ul><li>
+<code><a href="../reference/get_measures.html">get_measures()</a></code> now writes its result to nordstatExtras under <code>entity = "measures"</code> when a <code>nxt_handle</code>-backed <code>cache_location</code> is supplied. Previously the function only triggered the <code>entity = "structure"</code> cache (via <code>get_structure_raw()</code>), which is deliberately omitted from the search index — measures were therefore never searchable via <code><a href="https://rdrr.io/pkg/nordstatExtras/man/nxt_search.html" class="external-link">nxt_search()</a></code>. With this fix, measures appear in the search index.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="rtrafa-010">rTrafa 0.1.0<a class="anchor" aria-label="anchor" href="#rtrafa-010"></a></h2>
 <p>Initial CRAN release.</p>

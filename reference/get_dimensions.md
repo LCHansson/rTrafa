@@ -60,9 +60,12 @@ get_dimensions(
 A tibble with columns: `product`, `name`, `label`, `data_type`,
 `option`, `description`, `hierarchy`, `n_values`, `values`.
 
-The `values` column contains nested tibbles with columns `name`,
-`label`, and `type` (`"value"` for regular dimension values, `"filter"`
-for API filter shortcuts like `"senaste"` / latest).
+The `values` column contains nested tibbles with columns `code`, `text`,
+`name`, `label` and `type`. `code`/`text` mirror the conventions used by
+`pixieweb::get_variables()` and the sibling Kolada package;
+`name`/`label` are legacy aliases kept for backward compatibility.
+`type` is `"value"` for regular dimension values and `"filter"` for API
+filter shortcuts like `"senaste"` (latest).
 
 ## Details
 
@@ -137,17 +140,17 @@ if (trafa_available()) {
 #>   Selectable: Yes 
 #>   Values (3): 1 = Yrkesmässig trafik, 2 = Firmabilstrafik, t1 = Totalt
 #> 
-#> # A tibble: 10 × 3
-#>    name  label      type 
-#>    <chr> <chr>      <chr>
-#>  1 101   Bensin     value
-#>  2 102   Diesel     value
-#>  3 103   El         value
-#>  4 104   Elhybrid   value
-#>  5 105   Laddhybrid value
-#>  6 106   Etanol     value
-#>  7 107   Gas        value
-#>  8 108   Biodiesel  value
-#>  9 109   Övriga     value
-#> 10 t1    Totalt     value
+#> # A tibble: 10 × 5
+#>    code  text       name  label      type 
+#>    <chr> <chr>      <chr> <chr>      <chr>
+#>  1 101   Bensin     101   Bensin     value
+#>  2 102   Diesel     102   Diesel     value
+#>  3 103   El         103   El         value
+#>  4 104   Elhybrid   104   Elhybrid   value
+#>  5 105   Laddhybrid 105   Laddhybrid value
+#>  6 106   Etanol     106   Etanol     value
+#>  7 107   Gas        107   Gas        value
+#>  8 108   Biodiesel  108   Biodiesel  value
+#>  9 109   Övriga     109   Övriga     value
+#> 10 t1    Totalt     t1    Totalt     value
 ```

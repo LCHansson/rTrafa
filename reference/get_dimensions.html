@@ -11,7 +11,7 @@ get_data() — for example year, fuel type, or owner category."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">rTrafa</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9002</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -103,9 +103,13 @@ status.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A tibble with columns: <code>product</code>, <code>name</code>, <code>label</code>, <code>data_type</code>,
 <code>option</code>, <code>description</code>, <code>hierarchy</code>, <code>n_values</code>, <code>values</code>.</p>
-<p>The <code>values</code> column contains nested tibbles with columns <code>name</code>,
-<code>label</code>, and <code>type</code> (<code>"value"</code> for regular dimension values,
-<code>"filter"</code> for API filter shortcuts like <code>"senaste"</code> / latest).</p>
+<p>The <code>values</code> column contains nested tibbles with columns <code>code</code>,
+<code>text</code>, <code>name</code>, <code>label</code> and <code>type</code>. <code>code</code>/<code>text</code> mirror the
+conventions used by <code>pixieweb::get_variables()</code> and the sibling
+Kolada package; <code>name</code>/<code>label</code> are legacy aliases kept for
+backward compatibility. <code>type</code> is <code>"value"</code> for regular dimension
+values and <code>"filter"</code> for API filter shortcuts like <code>"senaste"</code>
+(latest).</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -178,19 +182,19 @@ can safely filter on.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Selectable: Yes </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Values (3): 1 = Yrkesmässig trafik, 2 = Firmabilstrafik, t1 = Totalt</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 10 × 3</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    name  label      type </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> 101   Bensin     value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> 102   Diesel     value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> 103   El         value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> 104   Elhybrid   value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> 105   Laddhybrid value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> 106   Etanol     value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> 107   Gas        value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> 108   Biodiesel  value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 109   Övriga     value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> t1    Totalt     value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 10 × 5</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    code  text       name  label      type </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> 101   Bensin     101   Bensin     value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> 102   Diesel     102   Diesel     value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> 103   El         103   El         value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> 104   Elhybrid   104   Elhybrid   value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> 105   Laddhybrid 105   Laddhybrid value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> 106   Etanol     106   Etanol     value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> 107   Gas        107   Gas        value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> 108   Biodiesel  108   Biodiesel  value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 109   Övriga     109   Övriga     value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> t1    Totalt     t1    Totalt     value</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

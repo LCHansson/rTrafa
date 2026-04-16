@@ -1,5 +1,41 @@
 # Changelog
 
+## rTrafa 0.1.0.9001 (development)
+
+### Minor changes
+
+- The nested `values` tibble inside
+  [`get_dimensions()`](https://lchansson.github.io/rTrafa/reference/get_dimensions.md)
+  now exposes `code` and `text` columns in addition to the legacy `name`
+  and `label` columns. `code`/`text` mirror the convention used by
+  `pixieweb::get_variables()` and the sibling Kolada package, making it
+  easier to write code that works against all three sources. The legacy
+  aliases remain for backward compatibility and will be deprecated in a
+  later release.
+
+### Bug fixes
+
+- [`get_data()`](https://lchansson.github.io/rTrafa/reference/get_data.md)
+  now warns when called with no dimension filters. The Trafa API returns
+  an empty response in this case, which previously surfaced only as a
+  cryptic “No data rows in Trafa API response.” warning. The new message
+  points the user to
+  [`get_dimensions()`](https://lchansson.github.io/rTrafa/reference/get_dimensions.md)
+  and suggests starting with an `ar = "..."` filter.
+
+## rTrafa 0.1.0.9000 (development)
+
+### Bug fixes
+
+- [`get_measures()`](https://lchansson.github.io/rTrafa/reference/get_measures.md)
+  now writes its result to nordstatExtras under `entity = "measures"`
+  when a `nxt_handle`-backed `cache_location` is supplied. Previously
+  the function only triggered the `entity = "structure"` cache (via
+  `get_structure_raw()`), which is deliberately omitted from the search
+  index — measures were therefore never searchable via
+  [`nxt_search()`](https://rdrr.io/pkg/nordstatExtras/man/nxt_search.html).
+  With this fix, measures appear in the search index.
+
 ## rTrafa 0.1.0
 
 Initial CRAN release.
