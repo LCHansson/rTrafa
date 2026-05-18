@@ -1,3 +1,88 @@
+# rTrafa 0.1.0.9006 (development)
+
+## Breaking changes
+
+* The `scrape_allowed_combinations()` / `scrape_all_allowed_combinations()`
+  functions introduced in 0.1.0.9003 have been **removed**. They read
+  Trafa's HTML documentation pages, which proved unreliable: the CMS
+  serves two response variants for the same URL (one with the
+  combinations list rendered, one without), and the page contents
+  sometimes go entirely empty. The `rvest` and `xml2` dependencies are
+  also removed.
+
+## New features
+
+* `discover_allowed_combinations(product, measure = NULL)` and
+  `discover_all_allowed_combinations()` enumerate the same information
+  via the Trafa **API** (the `/api/structure` endpoint, accessed
+  through the existing `get_dimensions()`). The function recursively
+  probes `get_dimensions(product, measure = c(measure, dim_set))` and
+  expands the dim-set as long as the API reports new addable
+  dimensions; it terminates when only `"ar"` (the implicit year axis)
+  remains.
+
+  This is the documented API contract — no scraping, no CMS quirks —
+  and individual `get_dimensions()` calls are cached transparently via
+  nordstatExtras. First-pass runtime is comparable to scraping
+  (~15-20 min for all 57 products); re-runs hit the cache and complete
+  in seconds. Return shape is identical to the removed scrape variants:
+  `tibble(product, measure, dimensions)` with `dimensions` as a list-col.
+
+# rTrafa 0.1.0.9005 (development)
+
+## Bug fixes
+
+* `scrape_allowed_combinations()` now retries with exponential backoff
+  when Trafa serves the "skeleton" HTML variant. trafa.se has two
+  back-end variants for the API documentation pages: a smaller skeleton
+  without the rendered combinations list (~51 KB for product T10010) and
+  the full version with `<ul class="api-combos">` populated (~95 KB).
+  Both return HTTP 200 from the same URL, with roughly 50/50 distribution.
+  Previous behaviour: scraping succeeded ~50 % of the time. New
+  behaviour: up to `max_attempts` (default 5) tries with sleeps of
+  0.3 s, 0.6 s, 1.2 s, 2.4 s between — gives ~97 % single-call success.
+* The "no combinations found" error message now explains the skeleton-
+  variant phenomenon and suggests raising `max_attempts` or checking the
+  page in a browser.
+
+# rTrafa 0.1.0.9004 (development)
+
+## Minor changes
+
+* `scrape_allowed_combinations()` and `scrape_all_allowed_combinations()`
+  now accept a `verbose` argument. When `TRUE`, the functions print
+  diagnostic messages — the URL fetched, the number of `<ul.api-combos>`
+  and `<li>` elements found, the first three raw scraped strings, the
+  number of measure codes resolved from the API, and the final result
+  shape. Useful when scraping fails or returns unexpected results.
+* The "no `<ul class='api-combos'>` found" error now suggests re-running
+  with `verbose = TRUE` for diagnostics.
+
+# rTrafa 0.1.0.9003 (development)
+
+## New features
+
+* `scrape_allowed_combinations(product)` and
+  `scrape_all_allowed_combinations()` read the *valid variable
+  combinations* for a Trafa product from the public HTML documentation
+  at `trafa.se/sidor/api-dokumentation/?code=<product>`. This information
+  is not exposed via the Trafa API but is essential for generating
+  actionable error messages when the API returns "no data" for an invalid
+  filter combination.
+
+  **Architectural caveat:** Unlike all other functions in this package,
+  these two **do not call the Trafa API**. They scrape the public
+  documentation website, which is outside the API contract. Both
+  functions print an informational message on each call (suppressible via
+  `silent = TRUE`) to make this distinction obvious. The URL is
+  configurable via the `TRAFA_DOCS_URL_TEMPLATE` environment variable to
+  ease testing and to provide a quick override if Trafa restructures
+  their CMS.
+
+  Errors during scraping are surfaced via `warning()` so batch jobs
+  (e.g. cron-driven cache priming) can keep running when an individual
+  product page fails.
+
 # rTrafa 0.1.0.9001 (development)
 
 ## Minor changes
