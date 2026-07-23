@@ -51,11 +51,20 @@ get_data <- function(product,
                      cache = FALSE,
                      cache_location = NULL,
                      verbose = FALSE) {
+  raw_query <- NULL
   if (inherits(query, "trafa_query")) {
     product <- query$product
     measure <- query$measure
     filters <- query$selections
     lang <- query$lang
+  } else if (is.character(query) && length(query) == 1) {
+    # Raw pipe-delimited query string ("t10094|mkorstr|ar:2024|reglan") —
+    # full expressiveness of the Trafa query language, incl. bare dims.
+    raw_query <- query
+    parts <- strsplit(query, "|", fixed = TRUE)[[1]]
+    product <- if (missing(product)) parts[1] else product
+    measure <- if (missing(measure)) parts[2] else measure
+    filters <- list()
   } else {
     if (missing(product) || missing(measure)) {
       abort("Both `product` and `measure` are required (or provide `query`).")
@@ -75,7 +84,7 @@ get_data <- function(product,
   # always a time dimension such as `ar`) to return data. Calling get_data
   # with no filters silently returns an empty tibble via "No data rows in
   # Trafa API response." — confusing and hard to diagnose. Warn up front.
-  if (length(filters) == 0) {
+  if (length(filters) == 0 && is.null(raw_query)) {
     warn(c(
       "No dimension filters were supplied to `get_data()`.",
       i = paste0("The Trafa API usually returns an empty response in this case. ",
@@ -108,7 +117,7 @@ get_data <- function(product,
     if (nxt_ch("discover")) return(nxt_ch("load"))
   }
 
-  query_str <- do.call(compose_data_query,
+  query_str <- raw_query %||% do.call(compose_data_query,
     c(list(product = product, measure = measure), filters)
   )
   url <- trafa_url("data", query = query_str, lang = lang)

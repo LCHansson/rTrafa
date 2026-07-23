@@ -43,9 +43,19 @@ compose_data_query <- function(product, measure, ...) {
   filters <- list(...)
   parts <- c(product, measure)
 
-  for (dim_name in names(filters)) {
-    values <- paste(as.character(filters[[dim_name]]), collapse = ",")
-    parts <- c(parts, paste0(dim_name, ":", values))
+  nms <- names(filters) %||% rep("", length(filters))
+  if (length(filters) > 0 && length(nms) == 0) nms <- rep("", length(filters))
+
+  for (i in seq_along(filters)) {
+    if (nzchar(nms[i])) {
+      # Named argument: a value filter — dim:val1,val2
+      values <- paste(as.character(filters[[i]]), collapse = ",")
+      parts <- c(parts, paste0(nms[i], ":", values))
+    } else {
+      # Unnamed character argument: a BARE dimension — included without a
+      # filter, so the API returns all its values (e.g. every county).
+      parts <- c(parts, as.character(filters[[i]]))
+    }
   }
 
   paste(parts, collapse = "|")

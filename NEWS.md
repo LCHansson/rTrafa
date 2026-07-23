@@ -1,3 +1,16 @@
+# rTrafa 0.1.0.9007 (development)
+
+## New features
+
+- **Bare (unfiltered) dimensions**: unnamed character arguments to
+  `get_data()` / `compose_data_query()` are included without a value
+  filter, so the API returns all values —
+  `get_data("t10094", "mkorstr", "reglan", ar = "2024")` yields every
+  county. Previously inexpressible (AE dev-backlog 2026-07-20).
+- **Raw query strings**: `get_data(query = "t10094|mkorstr|ar:2024|reglan")`
+  accepts a pipe-delimited query directly, exposing the full Trafa query
+  language.
+
 # rTrafa 0.1.0.9006 (development)
 
 ## Breaking changes
