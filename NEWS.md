@@ -1,5 +1,15 @@
 # rTrafa 0.1.0.9008 (development)
 
+## New features
+
+- **`discover_allowed_combinations(verify = TRUE)`**: probes each
+  discovered combination against the *data* endpoint (latest year,
+  dimensions bare) and adds a `has_data` column. The structure endpoint
+  can advertise measure/dimension spaces holding no rows at all —
+  `t06013` lists `ton` with `ar` alone, yet only combinations including
+  `trafik` plus one more dimension return data (AE 2026-08-04). The
+  docs now state plainly that structure is not data.
+
 ## Bug fixes
 
 - **Hidden-breakdown ambiguity is now detected**: some queries (e.g.

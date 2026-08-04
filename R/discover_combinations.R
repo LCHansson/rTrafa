@@ -11,6 +11,15 @@
 #' Same enumeration semantics, but using the documented `/api/structure`
 #' endpoint instead of brittle CMS markup.
 #'
+#' **Structure is not data.** The combinations come from Trafa's
+#' *structure* endpoint, which can advertise measure/dimension spaces
+#' that hold no rows at all (e.g. `t06013` lists `ton` with `ar` alone,
+#' yet every data query for it is empty). Set `verify = TRUE` to probe
+#' each discovered combination against the *data* endpoint (one query
+#' per combination, latest year, dimensions bare) and get a `has_data`
+#' column — slower, but tells you what a `get_data()` call will
+#' actually return.
+#'
 #' @param product character(1). Trafa product code (e.g. "t10011").
 #' @param measure character vector. One or more measure codes. When
 #'   `NULL` (default) or longer than one, the function iterates over
@@ -22,12 +31,18 @@
 #'   passed to [get_dimensions()].
 #' @param verbose logical(1). Print per-query diagnostics: product,
 #'   measure, current dim-set, and addable dimensions found.
+#' @param verify logical(1). Probe each discovered combination against
+#'   the data endpoint (latest year, dimensions bare) and add a
+#'   `has_data` column. Default `FALSE` (one extra API call per
+#'   combination when enabled).
 #' @return A tibble with columns:
 #' * `product`: character. Same as input.
 #' * `measure`: character. Measure code.
 #' * `dimensions`: list-col of character vectors. Each entry is a valid
 #'   dimension-set (always includes `"ar"`) for the given
 #'   `(product, measure)`.
+#' * `has_data` (only when `verify = TRUE`): logical. Whether a data
+#'   query for the combination returned any rows (`NA` on query error).
 #'
 #' One row per `(product, measure, dim-set)` combination.
 #'
@@ -45,7 +60,8 @@ discover_allowed_combinations <- function(product,
                                           measure = NULL,
                                           cache = TRUE,
                                           cache_location = trafa_cache_dir,
-                                          verbose = FALSE) {
+                                          verbose = FALSE,
+                                          verify = FALSE) {
   stopifnot(is.character(product), length(product) == 1)
 
   # If no measure given or multiple measures, iterate
@@ -63,7 +79,8 @@ discover_allowed_combinations <- function(product,
       discover_allowed_combinations(product, m,
                                     cache = cache,
                                     cache_location = cache_location,
-                                    verbose = verbose)
+                                    verbose = verbose,
+                                    verify = verify)
     })
     return(dplyr::bind_rows(parts))
   }
@@ -112,11 +129,41 @@ discover_allowed_combinations <- function(product,
   ckeys <- vapply(combos, paste, collapse = ",", FUN.VALUE = character(1))
   combos_unique <- combos[!duplicated(ckeys)]
 
-  tibble::tibble(
+  out <- tibble::tibble(
     product = product,
     measure = measure,
     dimensions = combos_unique
   )
+
+  if (isTRUE(verify)) {
+    latest_ar <- tryCatch({
+      dims <- get_dimensions(product, cache = cache,
+                             cache_location = cache_location)
+      av <- as.data.frame(dimension_values(dims, "ar"))
+      utils::tail(av$code[av$type == "value"], 1)
+    }, error = function(e) NULL)
+
+    out$has_data <- vapply(out$dimensions, function(dim_set) {
+      if (is.null(latest_ar)) return(NA)
+      bare <- setdiff(dim_set, "ar")
+      d <- tryCatch(
+        suppressWarnings(do.call(get_data, c(
+          list(product = product, measure = measure),
+          as.list(bare),
+          list(ar = latest_ar, cache = cache,
+               cache_location = if (identical(cache_location, trafa_cache_dir)) NULL else cache_location)
+        ))),
+        error = function(e) NULL
+      )
+      if (is.null(d)) FALSE else nrow(d) > 0
+    }, logical(1))
+    if (verbose) {
+      message("[discover] verified ", nrow(out), " combination(s): ",
+              sum(out$has_data %in% TRUE), " with data")
+    }
+  }
+
+  out
 }
 
 #' Discover allowed combinations for every Trafa product

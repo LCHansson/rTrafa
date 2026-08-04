@@ -108,3 +108,13 @@ test_that("full discovery workflow: products -> measures -> dimensions -> data",
   expect_s3_class(data, "tbl_df")
   expect_gt(nrow(data), 0)
 })
+
+test_that("discover_allowed_combinations(verify = TRUE) separates structure from data", {
+  # t04020: ptrparb needs trfslag — the ar-only combo is structure-valid
+  # but holds no data (the t06013 class of trap, AE 2026-08-04).
+  v <- discover_allowed_combinations("t04020", measure = "ptrparb", verify = TRUE)
+  expect_true("has_data" %in% names(v))
+  ar_only <- vapply(v$dimensions, function(d) identical(d, "ar"), logical(1))
+  expect_false(any(v$has_data[ar_only]))
+  expect_true(any(v$has_data[!ar_only]))
+})
