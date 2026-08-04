@@ -88,3 +88,67 @@ test_that("parse_trafa_data warns on empty response", {
   )
   expect_warning(parse_trafa_data(raw_no_rows), "No data rows")
 })
+
+test_that("parse_trafa_data warns on hidden-breakdown ambiguity", {
+  # Mimics t0802|godsvikt|ar:2024: the API returns many rows per year
+  # without including the breaking-down dimension in the response.
+  raw <- list(
+    Header = list(
+      Column = list(
+        list(Name = "ar", Value = "Year", Type = "D", DataType = "Tid", Unit = ""),
+        list(Name = "godsvikt", Value = "Goods", Type = "M", DataType = "String", Unit = "ton")
+      )
+    ),
+    Rows = list(
+      list(Cell = list(
+        list(Column = "ar", Name = "2024", Value = "2024", IsMeasure = FALSE),
+        list(Column = "godsvikt", Value = "163757", IsMeasure = TRUE)
+      )),
+      list(Cell = list(
+        list(Column = "ar", Name = "2024", Value = "2024", IsMeasure = FALSE),
+        list(Column = "godsvikt", Value = "66381", IsMeasure = TRUE)
+      ))
+    )
+  )
+  expect_warning(
+    result <- parse_trafa_data(raw, simplify = TRUE),
+    "unique dimension combination"
+  )
+  # Data still returned — the caller decides; the warning names the trap.
+  expect_equal(nrow(result), 2)
+})
+
+test_that("parse_trafa_data does not warn when dimensions disambiguate", {
+  raw <- list(
+    Header = list(
+      Column = list(
+        list(Name = "ar", Value = "Year", Type = "D", DataType = "Tid", Unit = ""),
+        list(Name = "svkust", Value = "Coast", Type = "D", DataType = "String", Unit = ""),
+        list(Name = "godsvikt", Value = "Goods", Type = "M", DataType = "String", Unit = "ton")
+      )
+    ),
+    Rows = list(
+      list(Cell = list(
+        list(Column = "ar", Name = "2024", Value = "2024", IsMeasure = FALSE),
+        list(Column = "svkust", Name = "t1", Value = "Totalt", IsMeasure = FALSE),
+        list(Column = "godsvikt", Value = "163757", IsMeasure = TRUE)
+      )),
+      list(Cell = list(
+        list(Column = "ar", Name = "2024", Value = "2024", IsMeasure = FALSE),
+        list(Column = "svkust", Name = "01", Value = "Ostkusten", IsMeasure = FALSE),
+        list(Column = "godsvikt", Value = "66381", IsMeasure = TRUE)
+      ))
+    )
+  )
+  expect_no_warning(parse_trafa_data(raw, simplify = TRUE))
+})
+
+test_that("empty response warning points at discover_allowed_combinations", {
+  raw <- list(
+    Header = list(Column = list(
+      list(Name = "ar", Value = "Year", Type = "D", DataType = "Tid", Unit = "")
+    )),
+    Rows = list()
+  )
+  expect_warning(parse_trafa_data(raw), "discover_allowed_combinations")
+})

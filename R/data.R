@@ -160,7 +160,13 @@ parse_trafa_data <- function(raw, simplify = TRUE) {
   }
 
   if (length(data_rows) == 0) {
-    warn("No data rows in Trafa API response.")
+    warn(c(
+      "No data rows in Trafa API response.",
+      i = paste0(
+        "The measure/dimension combination may not exist in this product ",
+        "— check valid combinations with `discover_allowed_combinations()`."
+      )
+    ))
     return(NULL)
   }
 
@@ -228,6 +234,31 @@ parse_trafa_data <- function(raw, simplify = TRUE) {
   if (is.null(result)) return(NULL)
 
   result <- tibble::as_tibble(result)
+
+  # Ambiguity guard (AE dev-backlog 2026-08-03): some queries — e.g.
+  # "t0802|godsvikt|ar:2024" — make the API break rows down by a dimension
+  # it does NOT include in the response. The result is many rows sharing
+  # identical dimension values with no way to tell them apart; passing
+  # that through silently corrupts any downstream aggregation.
+  dim_cols <- col_names[col_types == "D"]
+  dim_cols <- dim_cols[dim_cols %in% names(result)]
+  if (length(dim_cols) > 0 && nrow(result) > 1) {
+    n_unique <- nrow(unique(result[, dim_cols, drop = FALSE]))
+    if (n_unique < nrow(result)) {
+      warn(c(
+        sprintf(
+          "Trafa returned %d rows but only %d unique dimension combination(s) (%s).",
+          nrow(result), n_unique, paste(dim_cols, collapse = ", ")
+        ),
+        x = "The response contains a hidden breakdown: rows that cannot be told apart.",
+        i = paste0(
+          "Add more dimensions to the query to make the breakdown explicit, ",
+          "and check valid measure/dimension combinations with ",
+          "`discover_allowed_combinations()`."
+        )
+      ))
+    }
+  }
 
   # Attach column metadata as an attribute. This is backwards-compatible
   # (the tibble itself doesn't gain extra columns), but downstream functions

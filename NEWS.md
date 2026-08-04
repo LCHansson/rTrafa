@@ -1,3 +1,19 @@
+# rTrafa 0.1.0.9008 (development)
+
+## Bug fixes
+
+- **Hidden-breakdown ambiguity is now detected**: some queries (e.g.
+  `get_data("t0802", "godsvikt", ar = "2024")`) make the Trafa API break
+  rows down by a dimension it does not include in the response — many
+  rows share identical dimension values and cannot be told apart.
+  `get_data()` previously passed this through silently (corrupting any
+  downstream aggregation); it now warns with the row/combination counts
+  and points to `discover_allowed_combinations()` (AE dev-backlog
+  2026-08-03).
+- The "No data rows" warning now explains the likely cause (invalid
+  measure/dimension combination) and references
+  `discover_allowed_combinations()`.
+
 # rTrafa 0.1.0.9007 (development)
 
 ## New features
