@@ -9,7 +9,8 @@ discover_allowed_combinations(
   measure = NULL,
   cache = TRUE,
   cache_location = trafa_cache_dir,
-  verbose = FALSE
+  verbose = FALSE,
+  verify = FALSE
 )
 }
 \arguments{
@@ -28,6 +29,11 @@ passed to \code{\link[=get_dimensions]{get_dimensions()}}.}
 
 \item{verbose}{logical(1). Print per-query diagnostics: product,
 measure, current dim-set, and addable dimensions found.}
+
+\item{verify}{logical(1). Probe each discovered combination against
+the data endpoint (latest year, dimensions bare) and add a
+\code{has_data} column. Default \code{FALSE} (one extra API call per
+combination when enabled).}
 }
 \value{
 A tibble with columns:
@@ -37,6 +43,8 @@ A tibble with columns:
 \item \code{dimensions}: list-col of character vectors. Each entry is a valid
 dimension-set (always includes \code{"ar"}) for the given
 \verb{(product, measure)}.
+\item \code{has_data} (only when \code{verify = TRUE}): logical. Whether a data
+query for the combination returned any rows (\code{NA} on query error).
 }
 
 One row per \verb{(product, measure, dim-set)} combination.
@@ -53,6 +61,15 @@ This replaces the earlier HTML-scraping approach (which read Trafa's
 documentation pages directly) with a proper API-driven enumeration.
 Same enumeration semantics, but using the documented \verb{/api/structure}
 endpoint instead of brittle CMS markup.
+
+\strong{Structure is not data.} The combinations come from Trafa's
+\emph{structure} endpoint, which can advertise measure/dimension spaces
+that hold no rows at all (e.g. \code{t06013} lists \code{ton} with \code{ar} alone,
+yet every data query for it is empty). Set \code{verify = TRUE} to probe
+each discovered combination against the \emph{data} endpoint (one query
+per combination, latest year, dimensions bare) and get a \code{has_data}
+column — slower, but tells you what a \code{get_data()} call will
+actually return.
 }
 \examples{
 \dontrun{

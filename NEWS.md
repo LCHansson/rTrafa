@@ -1,3 +1,15 @@
+# rTrafa 0.1.0.9009 (development)
+
+## New features
+
+- **Silent-total guard**: when a *bare* dimension (a requested breakdown)
+  comes back with a single value, `get_data()` now warns instead of
+  returning valid-looking data in which every subgroup silently reads as
+  zero. Discovered via t10030, where aggregated heavy trucks
+  (`fslag_under = "62"`) return a lone `drivm = "t1"` row with no fuel
+  breakdown (dev-backlog 2026-08-17). Named single-value filters do not
+  trigger the guard; raw pipe-delimited queries are covered.
+
 # rTrafa 0.1.0.9008 (development)
 
 ## New features

@@ -58,7 +58,7 @@ get_data <- function(product,
     filters <- query$selections
     lang <- query$lang
   } else if (is.character(query) && length(query) == 1) {
-    # Raw pipe-delimited query string ("t10094|mkorstr|ar:2024|reglan") —
+    # Raw pipe-delimited query string ("t10094|mkorstr|ar:2024|reglan") --
     # full expressiveness of the Trafa query language, incl. bare dims.
     raw_query <- query
     parts <- strsplit(query, "|", fixed = TRUE)[[1]]
@@ -83,7 +83,7 @@ get_data <- function(product,
   # The Trafa API typically requires at least one dimension filter (almost
   # always a time dimension such as `ar`) to return data. Calling get_data
   # with no filters silently returns an empty tibble via "No data rows in
-  # Trafa API response." — confusing and hard to diagnose. Warn up front.
+  # Trafa API response." -- confusing and hard to diagnose. Warn up front.
   if (length(filters) == 0 && is.null(raw_query)) {
     warn(c(
       "No dimension filters were supplied to `get_data()`.",
@@ -129,6 +129,46 @@ get_data <- function(product,
 
   if (is.null(result)) return(NULL)
 
+  # Silent-total guard (dev-backlog 2026-08-17): a bare dimension means
+  # "break the data down by this". For parts of some products' range the
+  # API instead returns a single total-only row (e.g. t10030's `drivm`
+  # for aggregated heavy trucks, code "t1") -- valid-looking data in which
+  # every subgroup silently reads as zero. Warn when a requested
+  # breakdown collapses to a single value.
+  bare_dims <- character(0)
+  if (length(filters) > 0) {
+    nm <- names(filters) %||% rep("", length(filters))
+    is_bare <- nm == "" & vapply(filters, is.character, logical(1))
+    bare_dims <- unlist(filters[is_bare], use.names = FALSE)
+  } else if (!is.null(raw_query)) {
+    segs <- strsplit(raw_query, "|", fixed = TRUE)[[1]]
+    if (length(segs) > 2) {
+      segs <- segs[-(1:2)]
+      bare_dims <- segs[!grepl(":", segs, fixed = TRUE)]
+    }
+  }
+  for (d in intersect(bare_dims, names(result))) {
+    u <- unique(result[[d]])
+    if (length(u) == 1) {
+      lbl_col <- paste0(d, "_label")
+      lbl <- if (lbl_col %in% names(result)) unique(result[[lbl_col]])[1] else u
+      warn(c(
+        sprintf(
+          "Dimension '%s' was requested as a breakdown but came back with a single value ('%s'%s).",
+          d, u, if (!identical(lbl, u)) paste0(" = ", lbl) else ""
+        ),
+        x = paste0(
+          "The API may not carry this breakdown for the filtered slice; ",
+          "subgroup values would silently read as missing or zero."
+        ),
+        i = paste0(
+          "Try a finer subcategory filter (e.g. another `fslag_under` level) ",
+          "or a period/product where the breakdown exists."
+        )
+      ))
+    }
+  }
+
   attr(result, "trafa_source") <- list(
     product = product,
     measure = measure,
@@ -164,13 +204,13 @@ parse_trafa_data <- function(raw, simplify = TRUE) {
       "No data rows in Trafa API response.",
       i = paste0(
         "The measure/dimension combination may not exist in this product ",
-        "— check valid combinations with `discover_allowed_combinations()`."
+        "-- check valid combinations with `discover_allowed_combinations()`."
       )
     ))
     return(NULL)
   }
 
-  # Parse column metadata — extract all fields the API provides
+  # Parse column metadata -- extract all fields the API provides
   col_names <- vapply(columns, function(c) c$Name %||% NA_character_, character(1))
   col_labels <- vapply(columns, function(c) c$Value %||% c$Label %||% NA_character_, character(1))
   col_types <- vapply(columns, function(c) c$Type %||% NA_character_, character(1))
@@ -235,8 +275,8 @@ parse_trafa_data <- function(raw, simplify = TRUE) {
 
   result <- tibble::as_tibble(result)
 
-  # Ambiguity guard (AE dev-backlog 2026-08-03): some queries — e.g.
-  # "t0802|godsvikt|ar:2024" — make the API break rows down by a dimension
+  # Ambiguity guard (AE dev-backlog 2026-08-03): some queries -- e.g.
+  # "t0802|godsvikt|ar:2024" -- make the API break rows down by a dimension
   # it does NOT include in the response. The result is many rows sharing
   # identical dimension values with no way to tell them apart; passing
   # that through silently corrupts any downstream aggregation.
