@@ -35,6 +35,7 @@ reference:
     contents:
       - prepare_query
       - get_data
+      - trafa_get_data
 
   - title: Data utilities
     desc: Post-processing helpers for downloaded data.

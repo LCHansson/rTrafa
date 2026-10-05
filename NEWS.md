@@ -1,3 +1,14 @@
+# rTrafa 0.1.0.9011 (development)
+
+## New features
+
+- **`trafa_get_data()`: `get_data()` under a name that cannot be masked.**
+  pixieweb exports a `get_data()` too, so in a script that attaches both
+  packages the one attached last masks the other. `trafa_get_data()`
+  forwards to `get_data()` unchanged (pixieweb gains `px_get_data()`), and
+  attaching rTrafa while pixieweb is attached prints a one-line note
+  naming the two safe calls.
+
 # rTrafa 0.1.0.9010 (development)
 
 ## Bug fixes
