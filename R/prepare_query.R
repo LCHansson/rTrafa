@@ -63,7 +63,7 @@ prepare_query <- function(product,
   # Check user-supplied dimensions against valid ones
   if (!is.null(dims) && nrow(dims) > 0 && length(user_selections) > 0) {
     valid_names <- dims$name[is.na(dims$option) | dims$option == TRUE]
-    for (dim_name in names(user_selections)) {
+    for (dim_name in selection_dimensions(user_selections)) {
       if (!dim_name %in% dims$name) {
         all_dim_names <- paste0("'", dims$name, "'", collapse = ", ")
         warn(c(
@@ -79,6 +79,10 @@ prepare_query <- function(product,
       }
     }
   }
+
+  # Check the filter VALUES too: the API answers HTTP 500 for a value the
+  # dimension does not list, and get_data() then has nothing to return.
+  warn_unknown_filter_values(unknown_filter_values(dims, user_selections), product)
 
   query <- structure(
     list(
@@ -137,4 +141,72 @@ print.trafa_query <- function(x, ...) {
   }
 
   invisible(x)
+}
+
+#' The dimensions a set of selections refers to
+#'
+#' Named arguments are value filters (the name is the dimension); unnamed
+#' character arguments are bare dimensions (the value is the dimension).
+#' @param selections List as collected from `...`.
+#' @return Character vector of dimension names.
+#' @noRd
+selection_dimensions <- function(selections) {
+  if (length(selections) == 0) return(character())
+  nms <- names(selections) %||% rep("", length(selections))
+  bare <- unlist(lapply(selections[!nzchar(nms)], as.character), use.names = FALSE)
+  unique(c(nms[nzchar(nms)], bare))
+}
+
+#' Filter values that a dimension does not list
+#'
+#' @param dims A tibble from [get_dimensions()], or NULL.
+#' @param selections List of selections (named = value filters).
+#' @return A named list, dimension -> list(unknown, known): the offending
+#'   values and the dimension's own codes. Empty when all is in order or
+#'   when the dimension's values are not known.
+#' @noRd
+unknown_filter_values <- function(dims, selections) {
+  out <- list()
+  if (is.null(dims) || nrow(dims) == 0 || length(selections) == 0) return(out)
+  nms <- names(selections) %||% rep("", length(selections))
+  for (i in seq_along(selections)) {
+    dim_name <- nms[i]
+    if (!nzchar(dim_name) || !dim_name %in% dims$name) next
+    vals <- dims$values[[match(dim_name, dims$name)]]
+    known <- if (is.data.frame(vals)) as.character(vals$code %||% vals$name) else character()
+    known <- known[!is.na(known)]
+    if (length(known) == 0) next
+    asked <- as.character(selections[[i]])
+    unknown <- setdiff(asked, known)
+    if (length(unknown) > 0) out[[dim_name]] <- list(unknown = unknown, known = known)
+  }
+  out
+}
+
+#' Warn, once per dimension, about filter values it does not list
+#' @noRd
+warn_unknown_filter_values <- function(found, product) {
+  for (dim_name in names(found)) {
+    unknown <- found[[dim_name]]$unknown
+    known <- found[[dim_name]]$known
+    shown <- if (length(known) > 8) {
+      paste0(paste(utils::head(known, 3), collapse = ", "), ", ..., ",
+             paste(utils::tail(known, 3), collapse = ", "),
+             " (", length(known), " values)")
+    } else {
+      paste(known, collapse = ", ")
+    }
+    warn(c(
+      paste0(
+        "Filter value", if (length(unknown) > 1) "s" else "", " ",
+        paste0("'", utils::head(unknown, 5), "'", collapse = ", "),
+        if (length(unknown) > 5) paste0(" (+", length(unknown) - 5, " more)") else "",
+        " not found in dimension '", dim_name, "' of product '", product, "'."
+      ),
+      x = "The Trafa API answers HTTP 500 for a value the dimension does not list, and no data comes back.",
+      i = paste0("Values of '", dim_name, "': ", shown, "."),
+      i = paste0("See `get_dimensions(\"", product, "\") |> dimension_values(\"", dim_name, "\")`.")
+    ))
+  }
+  invisible(found)
 }

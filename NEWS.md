@@ -1,3 +1,20 @@
+# rTrafa 0.1.0.9010 (development)
+
+## Bug fixes
+
+- **A filter value the dimension does not list is named.** The Trafa API
+  answers HTTP 500 for an unknown filter value (a year after the last
+  published one, say), and `get_data()` came back empty with a warning
+  that said nothing about the filter; the failure then surfaced downstream
+  as something unrelated. `prepare_query()` now checks the values, not
+  only the dimension names, and warns with the offending values and the
+  ones the dimension has. `get_data()` does the same lookup when, and only
+  when, the answer came back empty (one extra structure request on that
+  path), so the warning names the cause. What the functions return is
+  unchanged.
+- `prepare_query()` no longer warns "Dimension '' not found" for a bare
+  (unnamed) dimension argument.
+
 # rTrafa 0.1.0.9009 (development)
 
 ## New features

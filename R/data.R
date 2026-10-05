@@ -123,11 +123,17 @@ get_data <- function(product,
   url <- trafa_url("data", query = query_str, lang = lang)
   raw <- trafa_get(url, verbose = verbose)
 
-  if (is.null(raw)) return(NULL)
+  if (is.null(raw)) {
+    explain_failed_fetch(product, filters, lang)
+    return(NULL)
+  }
 
   result <- parse_trafa_data(raw, simplify = simplify)
 
-  if (is.null(result)) return(NULL)
+  if (is.null(result)) {
+    explain_failed_fetch(product, filters, lang)
+    return(NULL)
+  }
 
   # Silent-total guard (dev-backlog 2026-08-17): a bare dimension means
   # "break the data down by this". For parts of some products' range the
@@ -181,6 +187,29 @@ get_data <- function(product,
   }
 
   result
+}
+
+#' Say why a fetch came back empty, when the filters explain it
+#'
+#' The API answers HTTP 500 (or no rows) for a filter value the dimension
+#' does not list, e.g. a year after the last published one. The generic
+#' warning says nothing about the filter, and the failure surfaces
+#' downstream as something unrelated. On this path only, look the values
+#' up in the product's structure (one extra request) and name the ones
+#' that are not there.
+#' @param product Product code.
+#' @param filters List of selections as passed to `get_data()`.
+#' @param lang Language code.
+#' @return Invisibly, the unknown values found (possibly an empty list).
+#' @noRd
+explain_failed_fetch <- function(product, filters, lang) {
+  nms <- names(filters) %||% rep("", length(filters))
+  if (length(filters) == 0 || !any(nzchar(nms))) return(invisible(list()))
+  dims <- tryCatch(
+    suppressWarnings(get_dimensions(product, lang = lang)),
+    error = function(e) NULL
+  )
+  invisible(warn_unknown_filter_values(unknown_filter_values(dims, filters), product))
 }
 
 #' Parse a Trafa data API response into a tibble
