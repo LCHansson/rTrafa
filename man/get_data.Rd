@@ -52,6 +52,16 @@ returned by \code{nordstatExtras::nxt_open()}. Ignored unless \code{cache = TRUE
 A tibble of data. Dimension columns use the dimension name;
 when \code{simplify = TRUE}, additional \verb{\{name\}_label} columns are added.
 Measure values are in a column named after the measure.
+
+A fetch that gives no data stops with an error (since 0.1.0.9012; it
+used to return \code{NULL} with a warning). The error has class
+\code{rtrafa_fetch_failed} when the request failed (no connection, an HTTP
+error, an answer that cannot be read) and, in addition,
+\code{rtrafa_no_data} when the API answered but with no rows, which is what
+a measure and dimension combination without data gives. The message
+carries the reasons, among them a filter value the dimension does not
+list, and the request. To probe whether a combination has data, catch
+the class: \code{tryCatch(get_data(...), rtrafa_no_data = function(e) NULL)}.
 }
 \description{
 The core function for downloading statistical data. Dimension filters

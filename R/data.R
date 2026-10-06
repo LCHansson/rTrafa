@@ -26,6 +26,16 @@
 #' @return A tibble of data. Dimension columns use the dimension name;
 #'   when `simplify = TRUE`, additional `{name}_label` columns are added.
 #'   Measure values are in a column named after the measure.
+#'
+#'   A fetch that gives no data stops with an error (since 0.1.0.9012; it
+#'   used to return `NULL` with a warning). The error has class
+#'   `rtrafa_fetch_failed` when the request failed (no connection, an HTTP
+#'   error, an answer that cannot be read) and, in addition,
+#'   `rtrafa_no_data` when the API answered but with no rows, which is what
+#'   a measure and dimension combination without data gives. The message
+#'   carries the reasons, among them a filter value the dimension does not
+#'   list, and the request. To probe whether a combination has data, catch
+#'   the class: `tryCatch(get_data(...), rtrafa_no_data = function(e) NULL)`.
 #' @export
 #' @examples
 #' \donttest{
@@ -121,19 +131,37 @@ get_data <- function(product,
     c(list(product = product, measure = measure), filters)
   )
   url <- trafa_url("data", query = query_str, lang = lang)
-  raw <- trafa_get(url, verbose = verbose)
+
+  # A fetch that gives no data stops with an error (Love, 2026-10-06). What
+  # the steps below warn about on the way is held back: it becomes the
+  # error's reasons when there is no data, and is signalled as the warnings
+  # it was when there is.
+  held <- list()
+  hold <- function(expr) {
+    withCallingHandlers(expr, warning = function(cnd) {
+      held[[length(held) + 1L]] <<- cnd
+      invokeRestart("muffleWarning")
+    })
+  }
+
+  raw <- hold(trafa_get(url, verbose = verbose))
 
   if (is.null(raw)) {
-    explain_failed_fetch(product, filters, lang)
-    return(NULL)
+    hold(explain_failed_fetch(product, filters, lang))
+    abort_failed_fetch(product, measure, url, held, no_data = FALSE)
   }
 
-  result <- parse_trafa_data(raw, simplify = simplify)
+  result <- hold(parse_trafa_data(raw, simplify = simplify))
 
   if (is.null(result)) {
-    explain_failed_fetch(product, filters, lang)
-    return(NULL)
+    # The API answered. No rows (or no columns) is "no data"; rows that
+    # could not be read are a failure.
+    no_data <- length(raw$Rows %||% raw$Data %||% list()) == 0 ||
+      length(raw$Header$Column %||% raw$Columns %||% list()) == 0
+    hold(explain_failed_fetch(product, filters, lang))
+    abort_failed_fetch(product, measure, url, held, no_data = no_data)
   }
+  for (cnd in held) warning(cnd)
 
   # Silent-total guard (dev-backlog 2026-08-17): a bare dimension means
   # "break the data down by this". For parts of some products' range the
@@ -187,6 +215,31 @@ get_data <- function(product,
   }
 
   result
+}
+
+#' Stop because a fetch gave no data
+#'
+#' @param product,measure What was asked for.
+#' @param url The request.
+#' @param held The warnings signalled on the way (condition objects): the
+#'   reasons.
+#' @param no_data `TRUE` when the API answered without rows, `FALSE` when
+#'   the request itself failed.
+#' @return Never returns: signals an error of class `rtrafa_fetch_failed`,
+#'   and `rtrafa_no_data` first when `no_data`.
+#' @noRd
+abort_failed_fetch <- function(product, measure, url, held, no_data) {
+  reasons <- vapply(held, conditionMessage, character(1))
+  head <- if (no_data) {
+    sprintf("The Trafa API returned no data for product '%s', measure '%s'.", product, measure)
+  } else {
+    sprintf("The fetch of product '%s', measure '%s' from the Trafa API failed.", product, measure)
+  }
+  abort(
+    c(head, stats::setNames(reasons, rep("x", length(reasons))), i = paste0("Request: ", url)),
+    class = c(if (no_data) "rtrafa_no_data", "rtrafa_fetch_failed"),
+    product = product, measure = measure, url = url, reasons = reasons
+  )
 }
 
 #' Say why a fetch came back empty, when the filters explain it

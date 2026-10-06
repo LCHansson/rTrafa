@@ -17,7 +17,8 @@
 #' yet every data query for it is empty). Set `verify = TRUE` to probe
 #' each discovered combination against the *data* endpoint (one query
 #' per combination, latest year, dimensions bare) and get a `has_data`
-#' column — slower, but tells you what a `get_data()` call will
+#' column (a combination for which `get_data()` stops with an error counts
+#' as no data) — slower, but tells you what a `get_data()` call will
 #' actually return.
 #'
 #' @param product character(1). Trafa product code (e.g. "t10011").

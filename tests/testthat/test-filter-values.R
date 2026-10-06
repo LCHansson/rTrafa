@@ -57,36 +57,35 @@ test_that("get_data() explains an empty answer by the unknown filter value", {
     trafa_get = function(...) NULL,
     get_dimensions = function(...) dims_fixture()
   )
-  expect_warning(
-    res <- get_data("t1", "itrfslut", ar = "2026"),
-    "'2026' not found in dimension 'ar'"
+  # The reason is in the error (0.1.0.9012), not in a warning beside a NULL.
+  expect_no_warning(
+    err <- expect_error(
+      get_data("t1", "itrfslut", ar = "2026"),
+      class = "rtrafa_fetch_failed"
+    )
   )
-  expect_null(res)
-  # Valid values: nothing to add, and the return value is as before
-  expect_no_warning(res2 <- get_data("t1", "itrfslut", ar = "2025"))
-  expect_null(res2)
+  expect_match(conditionMessage(err), "'2026' not found in dimension 'ar'", fixed = TRUE)
+  expect_true(any(grepl("'2026' not found", err$reasons, fixed = TRUE)))
+  # Valid values: still an error, with nothing to add about the filter
+  err2 <- expect_error(get_data("t1", "itrfslut", ar = "2025"), class = "rtrafa_fetch_failed")
+  expect_false(grepl("not found in dimension", conditionMessage(err2), fixed = TRUE))
 })
 
-test_that("a failed structure lookup does not turn into an error", {
+test_that("a failed structure lookup does not hide the failed fetch", {
   local_mocked_bindings(
     trafa_get = function(...) NULL,
     get_dimensions = function(...) stop("offline")
   )
-  expect_no_error(res <- get_data("t1", "itrfslut", ar = "2026"))
-  expect_null(res)
+  err <- expect_error(get_data("t1", "itrfslut", ar = "2026"), class = "rtrafa_fetch_failed")
+  expect_false(grepl("offline", conditionMessage(err), fixed = TRUE))
 })
 
 test_that("live: a year the product does not list is named", {
   skip_on_cran()
   skip_if_not(trafa_available(), "Trafa API not available")
-  w <- character()
-  res <- withCallingHandlers(
+  err <- expect_error(
     get_data("t10011", "itrfslut", ar = "2099"),
-    warning = function(cnd) {
-      w <<- c(w, conditionMessage(cnd))
-      invokeRestart("muffleWarning")
-    }
+    class = "rtrafa_fetch_failed"
   )
-  expect_true(is.null(res) || nrow(res) == 0)
-  expect_true(any(grepl("'2099' not found in dimension 'ar'", w, fixed = TRUE)))
+  expect_match(conditionMessage(err), "'2099' not found in dimension 'ar'", fixed = TRUE)
 })

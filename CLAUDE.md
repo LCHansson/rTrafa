@@ -64,7 +64,7 @@ Each entity type follows a consistent pattern:
 
 - All public functions return tibbles and are designed for `|>` chaining
 - Naming: `entity_operation()` (e.g., `product_search`, `dimension_values`)
-- API failures return NULL with warnings (no exceptions)
+- API failures return NULL with warnings, with one exception since 0.1.0.9012: `get_data()` stops with a classed error (`rtrafa_fetch_failed`, and `rtrafa_no_data` when the API answered without rows)
 - `trafa_available()` guards all examples/vignettes for offline safety (required by CRAN policy)
 - Uses `.data` pronoun from rlang for tidy evaluation; string column names in select/rename contexts
 - Roxygen2 generates all man pages and NAMESPACE — never edit those by hand

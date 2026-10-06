@@ -1,3 +1,26 @@
+# rTrafa 0.1.0.9012 (development)
+
+## Breaking changes
+
+- **`get_data()` stops with an error when a fetch gives no data.** It used
+  to return `NULL` with a warning, and a script that did not test for
+  `NULL` went on and failed later on something unrelated. The error has
+  class `rtrafa_fetch_failed` when the request failed (no connection, an
+  HTTP error, an answer that cannot be read), and `rtrafa_no_data` as well
+  when the API answered without rows, which is what a measure and dimension
+  combination without data gives. Its message carries what used to be the
+  warnings (the HTTP status, a filter value the dimension does not list)
+  and the request; the same are in the condition's fields `reasons` and
+  `url`. To probe for data, catch the class:
+  `tryCatch(get_data(...), rtrafa_no_data = function(e) NULL)`.
+  `trafa_get_data()` forwards and so does the same.
+  `discover_allowed_combinations(verify = TRUE)` already treated an error
+  as "no data" and is unchanged. The other fetching functions
+  (`get_products()`, `get_structure()`, `get_dimensions()`,
+  `get_measures()`) still return `NULL` with a warning.
+- A warning that concerns data that did arrive (the hidden breakdown, the
+  silent total) is a warning as before.
+
 # rTrafa 0.1.0.9011 (development)
 
 ## New features

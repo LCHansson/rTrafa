@@ -68,7 +68,8 @@ that hold no rows at all (e.g. \code{t06013} lists \code{ton} with \code{ar} alo
 yet every data query for it is empty). Set \code{verify = TRUE} to probe
 each discovered combination against the \emph{data} endpoint (one query
 per combination, latest year, dimensions bare) and get a \code{has_data}
-column — slower, but tells you what a \code{get_data()} call will
+column (a combination for which \code{get_data()} stops with an error counts
+as no data) — slower, but tells you what a \code{get_data()} call will
 actually return.
 }
 \examples{

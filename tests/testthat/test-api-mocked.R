@@ -104,14 +104,17 @@ test_that("get_data parses mocked data response", {
   expect_equal(result$itrfslut, 1000)
 })
 
-test_that("get_data returns NULL on API failure", {
+test_that("get_data stops with an error on API failure", {
   local_mocked_bindings(
     trafa_get = function(...) NULL
   )
 
-  # get_data with no dimension filters now emits a helpful warning up-front;
-  # the underlying API-failure path must still return NULL.
-  expect_null(suppressWarnings(get_data("t10011", "itrfslut")))
+  # get_data with no dimension filters emits a helpful warning up-front;
+  # the failed fetch itself is an error (0.1.0.9012).
+  expect_error(
+    suppressWarnings(get_data("t10011", "itrfslut")),
+    class = "rtrafa_fetch_failed"
+  )
 })
 
 test_that("get_data warns when called with no dimension filters", {
@@ -119,7 +122,7 @@ test_that("get_data warns when called with no dimension filters", {
   # "No data rows" warning emitted by parse_trafa_data.
   local_mocked_bindings(trafa_get = function(...) NULL)
   expect_warning(
-    get_data("t10011", "itrfslut", query = NULL),
+    try(get_data("t10011", "itrfslut", query = NULL), silent = TRUE),
     "No dimension filters"
   )
 })
