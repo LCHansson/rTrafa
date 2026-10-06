@@ -148,6 +148,7 @@ get_data <- function(product,
 
   if (is.null(raw)) {
     hold(explain_failed_fetch(product, filters, lang))
+    hold(explain_ruled_out(product, measure, filters, raw_query, lang))
     abort_failed_fetch(product, measure, url, held, no_data = FALSE)
   }
 
@@ -159,6 +160,7 @@ get_data <- function(product,
     no_data <- length(raw$Rows %||% raw$Data %||% list()) == 0 ||
       length(raw$Header$Column %||% raw$Columns %||% list()) == 0
     hold(explain_failed_fetch(product, filters, lang))
+    hold(explain_ruled_out(product, measure, filters, raw_query, lang))
     abort_failed_fetch(product, measure, url, held, no_data = no_data)
   }
   for (cnd in held) warning(cnd)
@@ -263,6 +265,41 @@ explain_failed_fetch <- function(product, filters, lang) {
     error = function(e) NULL
   )
   invisible(warn_unknown_filter_values(unknown_filter_values(dims, filters), product))
+}
+
+#' Say that the structure rules the selection out, when it does
+#'
+#' The data endpoint does not refuse a measure and dimensions that cannot be
+#' combined: it answers without rows. On the failure path only, the
+#' structure endpoint is asked for its verdict on exactly this selection
+#' (one extra request) and a "no" becomes one of the error's reasons.
+#' @param product,measure What was asked for.
+#' @param filters List of selections as passed to `get_data()`.
+#' @param raw_query The raw query string, when that is how it was asked.
+#' @param lang Language code.
+#' @return Invisibly, `TRUE` when a reason was given.
+#' @noRd
+explain_ruled_out <- function(product, measure, filters, raw_query, lang) {
+  dims <- if (!is.null(raw_query)) {
+    segs <- strsplit(raw_query, "|", fixed = TRUE)[[1]]
+    sub(":.*$", "", segs[-(1:2)])
+  } else {
+    nms <- names(filters) %||% rep("", length(filters))
+    bare <- unlist(filters[nms == "" & vapply(filters, is.character, logical(1))], use.names = FALSE)
+    c(nms[nzchar(nms)], bare)
+  }
+  dims <- unique(dims[nzchar(dims)])
+  verdict <- tryCatch(
+    check_combination(product, measure, dims, lang = lang)$allowed,
+    error = function(e) NA
+  )
+  if (!identical(verdict, FALSE)) return(invisible(FALSE))
+  warn(c(
+    sprintf("Trafa's structure rules out measure '%s' together with %s.",
+            measure, paste0("'", dims, "'", collapse = ", ")),
+    i = "See which dimensions can be chosen together with `get_allowed_structure()`."
+  ))
+  invisible(TRUE)
 }
 
 #' Parse a Trafa data API response into a tibble

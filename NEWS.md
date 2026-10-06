@@ -1,3 +1,39 @@
+# rTrafa 0.1.0.9013 (development)
+
+## New features
+
+- **`get_allowed_structure()`: which dimensions can be chosen together, for
+  a whole product at once.** The Trafa API publishes no list of allowed
+  combinations: its structure endpoint answers one selection at a time
+  (which items can still be added), and its data endpoint does not refuse a
+  selection that cannot be combined (it answers with no rows, or with a
+  lone total row). `get_allowed_structure(product)` returns, per measure,
+  the largest sets of dimensions that can be chosen together (`sets`); a
+  selection is allowed when it is part of one of them. It asks one request
+  per measure and dimension and one per candidate set, where the exhaustive
+  walk of `discover_allowed_combinations()` asks one per allowed set. It
+  rests on one assumption, that a part of an allowed set is itself allowed;
+  the tests compare the two on recorded products, where they agree. A
+  failed structure request stops it with an error of class
+  `rtrafa_structure_failed`. What the structure does not say: which
+  *values* of a dimension hold data for a measure (it lists the same values
+  for every measure), so an allowed selection can still be empty.
+- **`check_combination()`: can this measure and these dimensions be
+  combined?** With the answer of `get_allowed_structure()` it is answered
+  without a request and names what is in the way; without it, one structure
+  request gives the API's own verdict on exactly that selection.
+- **A failed or empty `get_data()` says when the structure rules the
+  selection out.** On the failure path only (one extra structure request),
+  the error's reasons gain "Trafa's structure rules out measure ...
+  together with ...". What `get_data()` returns or signals is otherwise
+  unchanged.
+
+## Tests
+
+- Structure answers recorded from the public API for four products
+  (`tests/testthat/fixtures/structure-*.json`: t10011, t10030, t0802,
+  t06013), played back without network by `helper-recorded-structure.R`.
+
 # rTrafa 0.1.0.9012 (development)
 
 ## Breaking changes
