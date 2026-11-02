@@ -21,8 +21,10 @@
 #'
 #' **How this function asks.** One request for the product; per measure one
 #' request for the dimensions it can take, one per such dimension for what
-#' can be chosen beside it, and then one per candidate set (the largest
-#' groups of dimensions that can all be paired with each other; a candidate
+#' can be chosen beside it (also the verdict on that dimension with the
+#' measure and the year), and then one per candidate set of three or more
+#' dimensions (the largest groups of dimensions that can all be paired with
+#' each other; a candidate
 #' the API turns down is tried again with one dimension less). This rests on
 #' one assumption: a part of an allowed set is itself allowed. The package's
 #' tests compare the result with the exhaustive walk of
@@ -114,15 +116,20 @@ get_allowed_structure <- function(product,
     free <- setdiff(own, always)
 
     # What can be chosen beside each dimension.
+    # The answer for each dimension is kept: it is also the API's verdict on
+    # the measure, the year and that dimension chosen together.
+    answers <- lapply(free, function(d) ask(c(m, always, d)))
+    names(answers) <- free
     beside <- lapply(free, function(d) {
-      a <- ask(c(m, always, d))
+      a <- answers[[d]]
       intersect(free, setdiff(a$name[a$type == "D" & a$option], d))
     })
     names(beside) <- free
+    taken <- function(d) selection_allowed(answers[[d]], m, c(always, d))
     paired <- function(a, b) b %in% beside[[a]] && a %in% beside[[b]]
 
     # Candidates: the largest groups in which every pair can be combined.
-    # One or two dimensions are known from the answers above; a larger
+    # One or two dimensions are judged by the answers above; a larger
     # candidate is put to the API, and one it turns down is tried again
     # with each dimension left out, larger sets always before smaller.
     found <- list()
@@ -134,7 +141,15 @@ get_allowed_structure <- function(product,
       level <- level[lengths(level) < size]
       for (s in now) {
         if (inside(s, found)) next
-        ok <- length(s) <= 2 || selection_allowed(ask(c(m, always, s)), m, c(always, s))
+        # One or two dimensions: the answers already fetched for them say
+        # whether each goes with the measure and the year (a pair is also
+        # known to be paired). A measure that takes a dimension only
+        # without the year is turned down here.
+        ok <- if (length(s) <= 2) {
+          all(vapply(s, taken, logical(1)))
+        } else {
+          selection_allowed(ask(c(m, always, s)), m, c(always, s))
+        }
         if (ok) {
           found[[length(found) + 1L]] <- s
         } else {

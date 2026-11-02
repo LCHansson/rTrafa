@@ -24,8 +24,10 @@ recorded_fixture <- function(product) {
   fx
 }
 
-recorded_structure <- function(product, asked = NULL) {
+recorded_structure <- function(product, asked = NULL, answers = list()) {
   fx <- recorded_fixture(product)
+  # `answers` replaces recorded answers (same "<measure>|<dims>" keys)
+  for (k in names(answers)) fx$answers[[recorded_key(strsplit(k, "|", fixed = TRUE)[[1]])]] <- answers[[k]]
   flag <- function(item, on) {
     item$Option <- on(item)
     item$StructureItems <- lapply(item$StructureItems %||% list(), flag, on = on)

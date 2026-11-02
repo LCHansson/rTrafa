@@ -135,3 +135,37 @@ test_that("printing a structure lists the sets", {
   s <- get_allowed_structure("t10011", measure = "avstslut")
   expect_output(print(s), "avstslut: {ar, agarkat, tillst}", fixed = TRUE)
 })
+
+# AE order 20261020081922-uckmax: a set of one or two dimensions was accepted
+# without reading the answer already fetched for it. Here the recorded answer
+# for avregunder|ar|avregform is replaced by what the source gives for a
+# selection it rules out (nothing flagged): the measure would take the
+# dimension only without the year.
+test_that("a set of one dimension the answer rules out is not accepted", {
+  ruled_out <- list(`avregunder|ar|avregform` = list(m = list(), d = list()))
+  asked <- new.env()
+  local_mocked_bindings(get_structure_raw = recorded_structure("t10011", asked, ruled_out))
+  s <- get_allowed_structure("t10011", measure = "avregunder")
+  expect_equal(vapply(sets_of(s, "avregunder"), key, character(1)), "ar")
+  # no request beyond the ones already made
+  expect_equal(s$requests, asked$n)
+  expect_equal(s$requests, 3L)
+
+  # The recorded answer, untouched, still gives the set
+  local_mocked_bindings(get_structure_raw = recorded_structure("t10011"))
+  s2 <- get_allowed_structure("t10011", measure = "avregunder")
+  expect_equal(vapply(sets_of(s2, "avregunder"), key, character(1)), "ar,avregform")
+})
+
+test_that("a pair is accepted only when the answer for each member allows it", {
+  # itrfslut|ar|drivm stays recorded; ruling out drivm alone with the year
+  # leaves drivm in no set
+  ruled_out <- list(`itrfslut|ar|drivm` = list(m = list(), d = list()))
+  local_mocked_bindings(get_structure_raw = recorded_structure("t10011", answers = ruled_out))
+  s <- get_allowed_structure("t10011", measure = "itrfslut")
+  expect_false("drivm" %in% unlist(s$sets$dimensions))
+  expect_setequal(
+    vapply(sets_of(s, "itrfslut"), key, character(1)),
+    c("ar,bussklass,leasing", "ar,leasing,pass", "agarkat,ar,tillst")
+  )
+})

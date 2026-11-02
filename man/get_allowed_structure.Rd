@@ -69,8 +69,10 @@ them. In practice a set is one of the tables the product is built from.
 
 \strong{How this function asks.} One request for the product; per measure one
 request for the dimensions it can take, one per such dimension for what
-can be chosen beside it, and then one per candidate set (the largest
-groups of dimensions that can all be paired with each other; a candidate
+can be chosen beside it (also the verdict on that dimension with the
+measure and the year), and then one per candidate set of three or more
+dimensions (the largest groups of dimensions that can all be paired with
+each other; a candidate
 the API turns down is tried again with one dimension less). This rests on
 one assumption: a part of an allowed set is itself allowed. The package's
 tests compare the result with the exhaustive walk of

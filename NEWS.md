@@ -1,3 +1,14 @@
+# rTrafa 0.1.0.9014 (development)
+
+## Bug fixes
+
+- **`get_allowed_structure()` reads the answer it has for a set of one or
+  two dimensions.** Such a set was accepted without a check, so a measure
+  that takes a dimension only without the year would have got a set the
+  source rules out. The answer for the measure, the year and that
+  dimension, already fetched to learn what can be chosen beside it, now
+  decides; no request is added. Not seen in the four recorded products.
+
 # rTrafa 0.1.0.9013 (development)
 
 ## New features
