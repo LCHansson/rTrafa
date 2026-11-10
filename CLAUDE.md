@@ -19,10 +19,10 @@ R CMD build .
 R CMD INSTALL .
 
 # Run tests
-Rscript -e "testthat::test_local()"
+Rscript tools/test.R          # Rscript -e is blocked by a hook; commands live in .R files
 
 # Regenerate documentation (roxygen2)
-Rscript -e "devtools::document()"
+Rscript tools/document.R
 ```
 
 From an R session with devtools:
